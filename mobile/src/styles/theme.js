@@ -1,4 +1,4 @@
-// Space Companion - Design System
+// Space-Eye - Design System
 export const COLORS = {
   // Primary palette - Deep space blues
   primary: '#6C63FF',

@@ -134,7 +134,7 @@ export default function AIAssistantScreen() {
       <View style={styles.emptyIcon}>
         <Text style={styles.emptyEmoji}>🚀</Text>
       </View>
-      <Text style={styles.emptyTitle}>Space Companion AI</Text>
+      <Text style={styles.emptyTitle}>Space-Eye AI</Text>
       <Text style={styles.emptyDesc}>
         Ask me anything about space, the ISS, {'\n'}astronauts, or satellites!
       </Text>

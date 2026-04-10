@@ -1,102 +1,85 @@
-# 🛰️ Space Companion (Space-Eye)
+# Space-Eye
 
-A comprehensive mobile application for real-time ISS tracking, satellite visibility alerts, AI-powered space education, and immersive space exploration.
+Space-Eye is a mobile app for real-time ISS tracking, location-based pass alerts, space education, immersive simulations, and an AI assistant that explains what users are seeing in context.
 
-## ✨ Features
+## Product Focus
 
-### Phase 1 — Core MVP
-- 🛰️ **Real-time ISS Tracking** — Live map with position, speed, altitude
-- 🔔 **Pass Alerts** — Location-based ISS visibility predictions
-- 🤖 **AI Assistant** — Space-aware chatbot powered by Ollama
-- 🌍 **Space Explorer** — NASA APOD, live streams, space facts
-- 👨‍🚀 **Astronaut Tracker** — People currently in space
+Space-Eye is designed to feel real-time, interactive, and educational without becoming a heavy scientific simulator. The primary audience includes space enthusiasts, students, parents, teachers, and curious users in India and globally.
 
-### Phase 2 — Immersive Experiences
-- 🌐 **4D Space View** — Three.js Earth, ISS orbit, Moon with pan controls
-- 🏠 **ISS 360° Tour** — Pannellum panorama + module map + ISS facts
-- 🚀 **Rocket Simulator** — Falcon 9, Soyuz, Crew Dragon launch animations
+## Phase 1 Scope
 
-### Phase 3 — Advanced Features
-- 📡 **Multi-Satellite Tracker** — Track ISS, Hubble, Tiangong, Starlink simultaneously
-- 🔭 **Telescope Simulation** — Pannable star map with real coordinates & constellations
-- 📺 **Space Media Hub** — NASA TV, APOD gallery, Mars Rover photos, NASA image search
+- AI assistant powered by OpenAI with real-time ISS and visibility context
+- Live ISS tracking with N2YO as the primary source and Open Notify as fallback
+- 4D space view with Earth, ISS orbit, Moon motion, and sunlight simulation
+- Selective satellite tracking focused on ISS and a small curated set of satellites
+- Location-based pass alerts with backend caching and notification support
+- Clean mobile onboarding and smooth core navigation
 
-## 🏗️ Architecture
+## Phase 2 Scope
 
+- ISS 360 tour with hotspot-based exploration
+- Rocket launch and docking simulation
+- Astronaut life and health learning module
+- Telescope-style simulation mode
+
+## Optional Phase 1 Add-On
+
+- Live space media, including NASA or ISS video when available, with image fallbacks
+
+## Stack
+
+- Frontend: React Native with Expo
+- Backend: Node.js with Express
+- Database: MongoDB Atlas with Mongoose
+- 3D: Three.js based mobile visualizations
+- Notifications: Firebase Cloud Messaging
+- APIs: N2YO, Open Notify, NASA Open APIs, OpenAI
+
+## Architecture
+
+```text
+Mobile App (React Native)
+        ->
+Backend API (Node.js + Express)
+        ->
+External APIs (N2YO, NASA, OpenAI)
+        ->
+MongoDB (cache, user preferences, chat history)
+        ->
+Firebase Cloud Messaging (alerts)
 ```
-Mobile App (React Native / Expo)
-        ↓
-Backend API (Node.js / Express)
-        ↓
-External APIs: N2YO, NASA, Ollama
-        ↓
-Database: MongoDB Atlas
-```
 
-## 🚀 Quick Start
+## Development Notes
+
+- N2YO usage should stay heavily cached because of rate limits
+- GPS-based visibility should include accuracy disclaimers
+- Timezone handling needs to stay explicit and testable
+- The app should remain performant on mid-range Android devices common in India
+
+## Quick Start
 
 ### Backend
+
 ```bash
 cd backend
-cp .env.example .env  # Add your API keys
 npm install
 npm run dev
 ```
 
 ### Mobile
+
 ```bash
 cd mobile
 npm install
 npx expo start
 ```
 
-## 🔑 Required API Keys
-- **N2YO** — [n2yo.com](https://www.n2yo.com/api/)
-- **NASA** — [api.nasa.gov](https://api.nasa.gov/)
-- **Ollama** — Local or cloud hosted LLM
+## Environment
 
-## 📁 Project Structure
+Use [backend/.env.example](/C:/Users/22vam/Downloads/isstracker/backend/.env.example) as the template for backend configuration.
 
-```
-isstracker/
-├── backend/                  # Node.js + Express API
-│   ├── config/               # Database & constants
-│   ├── middleware/            # Auth, rate limiting, errors
-│   ├── models/               # Mongoose schemas (User, Alert, ChatHistory)
-│   ├── routes/               # API routes (auth, iss, satellites, alerts, ai, media)
-│   ├── services/             # API integrations (N2YO, NASA, Ollama, notifications)
-│   └── utils/                # Helpers (time, geo)
-│
-├── mobile/                   # React Native (Expo)
-│   └── src/
-│       ├── components/       # GlassCard, GradientButton, LoadingSpinner
-│       ├── hooks/            # useISSPosition, useLocation
-│       ├── navigation/       # Bottom tabs + stack navigator
-│       ├── screens/
-│       │   ├── HomeScreen              # Dashboard
-│       │   ├── ISSTrackerScreen        # Live ISS map
-│       │   ├── AIAssistantScreen       # AI chat
-│       │   ├── AlertsScreen            # Pass predictions
-│       │   ├── ExploreScreen           # Feature hub
-│       │   ├── SpaceViewScreen         # 4D Three.js visualization
-│       │   ├── ISSTourScreen           # 360° ISS interior
-│       │   ├── RocketSimScreen         # Launch simulator
-│       │   ├── SatelliteTrackerScreen  # Multi-satellite tracking
-│       │   ├── TelescopeScreen         # Star map & planets
-│       │   └── SpaceMediaScreen        # NASA media & live feeds
-│       ├── services/         # Axios API client
-│       └── styles/           # Design system
-```
+## Repo Guide
 
-## 📱 Tech Stack
-- **Frontend:** React Native + Expo
-- **3D Engine:** Three.js + expo-gl
-- **Backend:** Node.js + Express
-- **Database:** MongoDB Atlas + Mongoose
-- **AI:** Ollama (OpenAI-compatible)
-- **APIs:** N2YO, Open Notify, NASA
-- **Maps:** react-native-maps
-- **360° View:** Pannellum (react-native-webview)
-
-## 📄 License
-MIT
+- [docs/PRD.md](/C:/Users/22vam/Downloads/isstracker/docs/PRD.md): finalized product requirements
+- [backend](/C:/Users/22vam/Downloads/isstracker/backend): Express API, MongoDB models, integrations
+- [mobile](/C:/Users/22vam/Downloads/isstracker/mobile): Expo app, navigation, screens, hooks, styles

@@ -1,7 +1,7 @@
 {
-  "name": "space-companion-backend",
+  "name": "space-eye-backend",
   "version": "1.0.0",
-  "description": "Space Companion API - ISS tracking, satellite data, AI assistant",
+  "description": "Space-Eye API - ISS tracking, alerts, simulations, and AI assistance",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

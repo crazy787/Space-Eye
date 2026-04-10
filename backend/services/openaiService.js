@@ -4,7 +4,7 @@ class AIService {
   constructor() {
     this._client = null;
 
-    this.systemPrompt = `You are Space Companion AI, an expert space education assistant built into a mobile app that tracks the International Space Station and satellites in real-time.
+    this.systemPrompt = `You are Space-Eye AI, an expert space education assistant built into a mobile app that tracks the International Space Station and a curated set of satellites in real-time.
 
 Your capabilities:
 - Answer any space-related questions with clear, engaging explanations
@@ -14,30 +14,31 @@ Your capabilities:
 - Discuss astronomy, planets, stars, and celestial phenomena
 
 Guidelines:
-- Keep responses concise but informative (mobile-friendly)
-- Use emojis sparingly for engagement 🚀🌍🛰️
+- Keep responses concise but informative for mobile users
 - When discussing ISS visibility, mention direction, timing, and brightness
 - If the user asks about current ISS position, reference the real-time data provided in context
+- If the user is on a simulation or learning screen, tailor the explanation to what they are viewing
+- Be educational, approachable, and accurate over being overly dramatic
 - For complex topics, break them into simple, digestible steps
 - Be enthusiastic about space exploration
 - If unsure about something, say so rather than making things up
 - Convert technical jargon into plain language
 
-You have access to real-time data that may be injected into the conversation context.`;
+You may receive real-time tracking data in the conversation context.`;
   }
 
   get client() {
     if (!this._client) {
       this._client = new OpenAI({
-        apiKey: process.env.AI_API_KEY || 'ollama',
-        baseURL: process.env.AI_BASE_URL || 'http://localhost:11434/v1',
+        apiKey: process.env.OPENAI_API_KEY || process.env.AI_API_KEY,
+        ...(process.env.AI_BASE_URL ? { baseURL: process.env.AI_BASE_URL } : {}),
       });
     }
     return this._client;
   }
 
   get model() {
-    return process.env.AI_MODEL || 'llama3';
+    return process.env.AI_MODEL || 'gpt-4o-mini';
   }
 
   /**
@@ -51,21 +52,22 @@ You have access to real-time data that may be injected into the conversation con
         { role: 'system', content: this.systemPrompt },
       ];
 
-      // Inject real-time context if available
       if (context) {
         let contextStr = '\n\n--- REAL-TIME DATA ---\n';
+
         if (context.issPosition) {
-          contextStr += `ISS Current Position: Lat ${context.issPosition.latitude}°, Lng ${context.issPosition.longitude}°\n`;
+          contextStr += `ISS Current Position: Lat ${context.issPosition.latitude} deg, Lng ${context.issPosition.longitude} deg\n`;
         }
         if (context.astronauts) {
           contextStr += `People in space: ${context.astronauts.number} (${context.astronauts.people?.map((a) => `${a.name} on ${a.craft}`).join(', ')})\n`;
         }
         if (context.userLocation) {
-          contextStr += `User Location: Lat ${context.userLocation.latitude}°, Lng ${context.userLocation.longitude}°\n`;
+          contextStr += `User Location: Lat ${context.userLocation.latitude} deg, Lng ${context.userLocation.longitude} deg\n`;
         }
         if (context.nextPass) {
           contextStr += `Next ISS pass for user: ${context.nextPass}\n`;
         }
+
         contextStr += '--- END DATA ---';
 
         systemMessages.push({
@@ -111,7 +113,7 @@ You have access to real-time data that may be injected into the conversation con
 
       return response.choices[0].message.content.trim();
     } catch (error) {
-      return 'Space Chat';
+      return 'Space-Eye Chat';
     }
   }
 }

@@ -92,7 +92,7 @@ export default function HomeScreen({ navigation }) {
         {/* Header */}
         <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <View>
-            <Text style={styles.greeting}>Space Companion</Text>
+            <Text style={styles.greeting}>Space-Eye</Text>
             <Text style={styles.subtitle}>Explore the cosmos 🚀</Text>
           </View>
           <TouchableOpacity style={styles.profileBtn}>

@@ -29,7 +29,7 @@ app.use('/api/', apiLimiter);
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: '🚀 Space Companion API is running!',
+    message: '🚀 Space-Eye API is running!',
     version: '1.0.0',
     endpoints: {
       iss: '/api/iss',
@@ -73,7 +73,7 @@ app.use(errorHandler);
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 Space Companion API Server`);
+  console.log(`\n🚀 Space-Eye API Server`);
   console.log(`📡 Running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 http://localhost:${PORT}\n`);
