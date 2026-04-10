@@ -389,11 +389,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   headerTitle: {
-    color: COLORS.textPrimary, fontSize: FONT_SIZES.lg,
+    color: COLORS.textPrimary, fontSize: FONT_SIZES.title,
     fontWeight: '700', textAlign: 'center',
   },
   headerSub: {
-    color: COLORS.textMuted, fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted, fontSize: FONT_SIZES.caption,
     textAlign: 'center', letterSpacing: 1,
   },
   labelBtn: {
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   labelTag: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   labelDot: { width: 8, height: 8, borderRadius: 4 },
-  labelText: { color: COLORS.textSecondary, fontSize: FONT_SIZES.xs },
+  labelText: { color: COLORS.textSecondary, fontSize: FONT_SIZES.caption },
   issData: {
     position: 'absolute',
     top: 130,
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   issDataRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  issDataText: { color: COLORS.textSecondary, fontSize: FONT_SIZES.xs, fontVariant: ['tabular-nums'] },
+  issDataText: { color: COLORS.textSecondary, fontSize: FONT_SIZES.caption, fontVariant: ['tabular-nums'] },
   controls: {
     position: 'absolute',
     bottom: 0,
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   controlLabel: {
-    color: COLORS.textMuted, fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted, fontSize: FONT_SIZES.caption,
     fontWeight: '700', letterSpacing: 1.5, marginRight: 4,
   },
   speedBtn: {
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   speedBtnActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  speedBtnText: { color: COLORS.textMuted, fontSize: FONT_SIZES.sm, fontWeight: '600' },
+  speedBtnText: { color: COLORS.textMuted, fontSize: FONT_SIZES.small, fontWeight: '600' },
   speedBtnTextActive: { color: '#000' },
   bottomRow: {
     flexDirection: 'row',
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   playBtn: {},
   orbitInfo: { alignItems: 'center' },
   orbitCount: { color: COLORS.primary, fontSize: FONT_SIZES.xxl, fontWeight: '800' },
-  orbitLabel: { color: COLORS.textMuted, fontSize: FONT_SIZES.xs, letterSpacing: 0.5 },
+  orbitLabel: { color: COLORS.textMuted, fontSize: FONT_SIZES.caption, letterSpacing: 0.5 },
   dragHint: { alignItems: 'center', gap: 2 },
-  dragText: { color: COLORS.textMuted, fontSize: FONT_SIZES.xs },
+  dragText: { color: COLORS.textMuted, fontSize: FONT_SIZES.caption },
 });

@@ -15,6 +15,8 @@ import { StatusBar } from 'expo-status-bar';
 import GlassCard from '../components/common/GlassCard';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../styles/theme';
 import useISSPosition from '../hooks/useISSPosition';
+import { useOffline } from '../context/OfflineContext';
+import { useSettings } from '../context/SettingsContext';
 import { issAPI, mediaAPI } from '../services/api';
 
 const { width } = Dimensions.get('window');
@@ -24,10 +26,14 @@ const FEATURES = [
   { id: 'ai', title: 'AI Assistant', icon: 'chatbubbles', color: '#6C63FF', desc: 'Ask anything', screen: 'AI' },
   { id: 'alerts', title: 'Pass Alerts', icon: 'notifications', color: '#FF6B35', desc: 'Visibility alerts', screen: 'Alerts' },
   { id: 'explore', title: 'Explore', icon: 'telescope', color: '#00B4D8', desc: 'Space media', screen: 'Explore' },
+  { id: 'astronaut', title: 'Astronaut Life', icon: 'body', color: '#ce93d8', desc: 'Health & routine', screen: 'AstronautLife' },
+  { id: 'settings', title: 'Settings', icon: 'settings', color: '#90a4ae', desc: 'Preferences', screen: 'Settings' },
 ];
 
 export default function HomeScreen({ navigation }) {
   const { position, loading: issLoading } = useISSPosition(10000);
+  const { isOnline, cacheISSPosition, cacheAstronauts, cachedISSPosition } = useOffline();
+  const { formatSpeed, formatAltitude } = useSettings();
   const [astronauts, setAstronauts] = useState(null);
   const [apod, setApod] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -59,6 +65,7 @@ export default function HomeScreen({ navigation }) {
       ]);
       if (astroRes.status === 'fulfilled' && astroRes.value.success) {
         setAstronauts(astroRes.value.data);
+        cacheAstronauts(astroRes.value.data);
       }
       if (apodRes.status === 'fulfilled' && apodRes.value.success) {
         setApod(apodRes.value.data);
@@ -68,11 +75,21 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  // Cache ISS position whenever it updates
+  useEffect(() => {
+    if (position) {
+      cacheISSPosition(position);
+    }
+  }, [position]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchData();
     setRefreshing(false);
   };
+
+  // Use live position or fall back to cached
+  const displayPosition = position || cachedISSPosition;
 
   return (
     <View style={styles.container}>
@@ -95,7 +112,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.greeting}>Space-Eye</Text>
             <Text style={styles.subtitle}>Explore the cosmos 🚀</Text>
           </View>
-          <TouchableOpacity style={styles.profileBtn}>
+          <TouchableOpacity style={styles.profileBtn} onPress={() => navigation.navigate('Profile')}>
             <LinearGradient colors={COLORS.gradientPrimary} style={styles.profileGradient}>
               <Ionicons name="person" size={20} color={COLORS.textPrimary} />
             </LinearGradient>
@@ -121,21 +138,21 @@ export default function HomeScreen({ navigation }) {
 
               <Text style={styles.issTitle}>🛰️ International Space Station</Text>
 
-              {position ? (
+              {displayPosition ? (
                 <View style={styles.issStats}>
                   <View style={styles.issStat}>
                     <Text style={styles.issStatLabel}>LATITUDE</Text>
-                    <Text style={styles.issStatValue}>{position.latitude?.toFixed(4)}°</Text>
+                    <Text style={styles.issStatValue}>{displayPosition.latitude?.toFixed(4)}°</Text>
                   </View>
                   <View style={styles.issStatDivider} />
                   <View style={styles.issStat}>
                     <Text style={styles.issStatLabel}>LONGITUDE</Text>
-                    <Text style={styles.issStatValue}>{position.longitude?.toFixed(4)}°</Text>
+                    <Text style={styles.issStatValue}>{displayPosition.longitude?.toFixed(4)}°</Text>
                   </View>
                   <View style={styles.issStatDivider} />
                   <View style={styles.issStat}>
                     <Text style={styles.issStatLabel}>REGION</Text>
-                    <Text style={styles.issStatValue} numberOfLines={1}>{position.region || '—'}</Text>
+                    <Text style={styles.issStatValue} numberOfLines={1}>{displayPosition.region || '—'}</Text>
                   </View>
                 </View>
               ) : (
@@ -147,15 +164,15 @@ export default function HomeScreen({ navigation }) {
               <View style={styles.issFooter}>
                 <View style={styles.issFooterItem}>
                   <Ionicons name="speedometer-outline" size={14} color={COLORS.issColor} />
-                  <Text style={styles.issFooterText}>27,600 km/h</Text>
+                  <Text style={styles.issFooterText}>{formatSpeed(27600)}</Text>
                 </View>
                 <View style={styles.issFooterItem}>
                   <Ionicons name="resize-outline" size={14} color={COLORS.issColor} />
-                  <Text style={styles.issFooterText}>~408 km alt</Text>
+                  <Text style={styles.issFooterText}>~{formatAltitude(408)} alt</Text>
                 </View>
                 <View style={styles.issFooterItem}>
-                  <Ionicons name={position?.isNighttime ? 'moon-outline' : 'sunny-outline'} size={14} color={COLORS.issColor} />
-                  <Text style={styles.issFooterText}>{position?.isNighttime ? 'Night' : 'Day'}</Text>
+                  <Ionicons name={displayPosition?.isNighttime ? 'moon-outline' : 'sunny-outline'} size={14} color={COLORS.issColor} />
+                  <Text style={styles.issFooterText}>{displayPosition?.isNighttime ? 'Night' : 'Day'}</Text>
                 </View>
               </View>
             </LinearGradient>

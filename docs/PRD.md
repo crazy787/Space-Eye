@@ -1,49 +1,94 @@
-# Space-Eye v1.1 Production PRD
+# Space-Eye v3.0 Master PRD
 
 ## 1. Product Overview
+
+Product name: Space-Eye
+
+Tagline:
+`See Space From Your World`
+
+Description:
 
 Space-Eye is a mobile application that allows users to:
 
 - Track the International Space Station and selected satellites in real time
-- Receive location-based visibility alerts
-- Explore space through 3D and 4D visualization
-- Experience a 360 degree ISS interior tour
-- Understand rocket launches and docking through guided simulation
-- Learn about astronaut life and space health
-- Interact with an AI assistant for contextual space queries
+- Receive personalized visibility alerts based on their location
+- Explore space through interactive 4D visualization
+- Experience the ISS through a 360 degree virtual tour
+- Simulate rocket launch and docking
+- Learn astronaut life and health in space
+- Interact with an offline-capable AI assistant powered by Ollama
 
-## 2. Product Positioning
+## 2. Product Vision
 
+To create a personal space companion that makes space:
+
+- Visible
+- Understandable
 - Interactive
-- Educational
-- Real-time
-- Personal space companion based on user location
+- Accessible even without internet through offline AI capability
 
-Space-Eye is not a scientific-grade simulator.
+## 3. Target Users
 
-## 3. Core Features
+- Students aged 12 and above
+- Space enthusiasts
+- General users curious about space
 
-### 3.1 AI Assistant
+## 4. Core Value Proposition
+
+Users can:
+
+- See what is happening above them
+- Know when they can observe satellites
+- Understand space through visuals and AI
+- Experience space in an interactive way
+
+## 5. Core Modules
+
+### 5.1 AI Assistant
 
 Use:
-- OpenAI
+- Ollama
+
+Models:
+- `llama3` recommended
+- `mistral` as a faster alternative
 
 Capabilities:
 - Answer space-related questions
-- Use real-time ISS and satellite data
-- Provide contextual responses based on user state
+- Explain the ISS, satellites, and space physics
+- Answer visibility queries
+- Provide contextual responses
 
-Backend context injection before an AI request should include:
-- User location, such as latitude and longitude or city
+Context-aware backend logic must inject:
+- User location
 - Current ISS position
-- Next ISS pass time
-- Current app screen
+- Next pass timing
+- Visibility status
 
-Example:
-- User asks, "Can I see ISS now?"
-- System enriches the request with location and pass data before sending it to the model
+Example API request:
 
-### 3.2 ISS Live Tracking
+```json
+{
+  "message": "Can I see ISS now?"
+}
+```
+
+Example prompt structure:
+
+```text
+User location: Hyderabad
+ISS visible: Yes
+Next pass: 8:42 PM
+
+Question: Can I see ISS now?
+```
+
+Response goals:
+- Natural language
+- Simple and educational
+
+### 5.2 ISS Live Tracking Module
 
 Use:
 - N2YO API
@@ -53,16 +98,44 @@ Features:
 - Real-time latitude and longitude
 - Speed around 28,000 km/h
 - Altitude
-- Orbit path visualization
+- Orbit path
 
-Backend behavior:
-- Cache position every 5 to 10 seconds
-- Serve cached data to clients
+Backend logic:
+- Fetch data every 5 to 10 seconds
+- Cache results
+- Serve cached data
 
-### 3.3 4D Space Visualization
+### 5.3 Satellite Tracking Module
 
-Definition:
-- 3D space plus time-based motion
+Scope:
+- ISS as primary
+- Selected Starlink satellites, around 2 to 3
+- Optional additional satellites
+
+Constraints:
+- Limit total tracked satellites to 10 or fewer
+- Filter by visibility
+
+### 5.4 Nearby Alert System
+
+Components:
+- N2YO Visual Pass API
+- Firebase Cloud Messaging
+
+Features:
+- Notify before a satellite pass
+- Display time, duration, and direction
+
+Backend flow:
+- Fetch pass predictions
+- Store them in the database
+- Convert UTC to local time
+- Trigger notifications
+
+Scheduler:
+- Cron job every 5 to 10 minutes
+
+### 5.5 4D Space Visualization Module
 
 Features:
 - Earth rotation with day and night cycle
@@ -71,57 +144,21 @@ Features:
 - Sun lighting
 
 Constraints:
-- Pre-calculated animation
 - No real-time physics engine
+- Pre-calculated animations
 
-### 3.4 Satellite Tracking
-
-Use:
-- N2YO API
-
-Scope:
-- ISS as the primary object
-- Limited Starlink satellites, roughly 2 to 3
-- Optional weather and GPS satellites
-
-Rules:
-- Do not track all satellites
-- Filter by visibility or relevance
-
-### 3.5 Nearby Alert System
-
-Components:
-- N2YO Visual Passes API
-- Firebase Cloud Messaging
-
-Features:
-- Upcoming ISS pass notifications
-- 10-minute pre-alert
-- Visible-now alert
-- Direction such as NW to SE
-- Duration
-
-Backend flow:
-- Fetch passes periodically
-- Store upcoming passes
-- Convert UTC to local time
-- Trigger FCM
-
-Scheduler:
-- Cron job every 5 to 10 minutes
-
-### 3.6 ISS 360 Tour
+### 5.6 ISS 360 Tour Module
 
 Features:
 - 360 degree interior exploration
-- Hotspots for sleeping area, eating area, Cupola, and lab modules
+- Hotspots for sleeping, eating, Cupola, and lab areas
 
 Tech:
-- Pannellum inside a WebView
+- Pannellum plus WebView
 
-### 3.7 Rocket Launch and Docking Simulation
+### 5.7 Rocket Launch and Docking Simulation
 
-Flow:
+Steps:
 - Launch
 - Booster separation
 - Orbit insertion
@@ -132,63 +169,54 @@ Features:
 - Speed indicator
 - Altitude progression
 
-Implementation:
-- Animation-based using Lottie or Three.js
-
-### 3.8 Astronaut Life and Health Module
+### 5.8 Astronaut Life and Health Module
 
 Topics:
 - Zero gravity effects
-- Muscle atrophy
+- Muscle loss
 - Bone density loss
 - Fluid shift
 - Daily routines
 
 Features:
 - Visual explanations
-- AI expansion on demand
+- AI-based deeper answers
 
-### 3.9 Telescope Simulation Mode
+### 5.9 Telescope Simulation Module
 
 Features:
 - Zoom into ISS
 - Zoom into Earth
 - Zoom into Moon
 
-Notes:
+Constraints:
 - Fully simulated
 - No real telescope integration
 
-### 3.10 User System and Preferences
+### 5.10 User and Preferences Module
 
 Features:
-- Optional login with Google or email
-- Store preferred location
-- Store alert settings
+- Optional login
+- Store location
+- Store alert preferences
 - Store selected satellites
 
-### 3.11 Settings Module
+### 5.11 Settings Module
 
-Controls:
-- Enable or disable alerts
+Features:
+- Toggle notifications
 - Select satellites
 - Choose units such as km/h or mph
-- Theme control as an optional feature
+- Optional theme control
 
-### 3.12 Offline and Fallback Handling
+### 5.12 Offline Handling Module
 
 Features:
 - Cache the last ISS position
-- Show a last-updated timestamp
-- Provide graceful fallback UI
+- Show last updated time
+- Graceful fallback UI
 
-### 3.13 Live Space Media
-
-Optional feature:
-- NASA ISS live Earth feed
-- Embedded video streams
-
-## 4. Technical Architecture
+## 6. Technical Architecture
 
 Frontend:
 - React Native with Expo
@@ -203,31 +231,32 @@ APIs:
 - N2YO API
 - NASA Open APIs
 - Open Notify API
-- OpenAI
+
+AI:
+- Ollama
 
 Notifications:
 - Firebase Cloud Messaging
 
-## 5. System Architecture
+## 7. System Architecture
 
 ```text
 Mobile App (React Native)
         ->
-Backend (Node.js + Express)
+Backend (Node.js)
         ->
-Caching Layer (MongoDB)
+Context Builder (ISS + Location)
         ->
-External APIs:
-   - N2YO
-   - NASA
-   - OpenAI
+Ollama (Local AI)
+        ->
+Database (MongoDB Cache)
         ->
 Scheduler (Cron Jobs)
         ->
-Firebase Cloud Messaging
+Firebase Notifications
 ```
 
-## 6. Backend Responsibilities
+## 8. Backend Responsibilities
 
 - API aggregation
 - Data caching
@@ -236,73 +265,87 @@ Firebase Cloud Messaging
 - Notification scheduling
 - Timezone conversion
 
-## 7. User Flows
+## 9. Database Design
 
-- Tracking: open app, view ISS live, explore orbit
-- Alert: receive notification, open app, review direction and time
-- Exploration: open ISS tour and interact with modules
-- Simulation: run a rocket mission and observe docking
-- AI: ask a question and receive a contextual response
+Users:
 
-## 8. Constraints
+```json
+{
+  "userId": "...",
+  "location": {},
+  "preferences": {},
+  "notificationsEnabled": true
+}
+```
 
-- API rate limits, especially from N2YO
+Passes:
+
+```json
+{
+  "satelliteId": 25544,
+  "startTime": "2026-04-10T12:00:00.000Z",
+  "endTime": "2026-04-10T12:05:00.000Z",
+  "direction": "NW -> SE"
+}
+```
+
+Cache:
+
+```json
+{
+  "issPosition": {},
+  "lastUpdated": "2026-04-10T12:00:00.000Z"
+}
+```
+
+## 10. User Flows
+
+- Tracking: open app, view ISS, check visibility
+- Alerts: receive notification, open app, view details
+- Exploration: enter ISS tour and interact
+- Simulation: run rocket simulation
+- AI: ask a question and receive a contextual answer
+
+## 11. Constraints
+
+- API limits from N2YO
 - Device performance for 3D rendering
-- GPS accuracy
-- Timezone handling
+- Ollama RAM requirements
 
-## 9. Non-Goals
+## 12. Non-Goals
 
-- Full real-time physics simulation
+- Full real-time physics engine
 - Real telescope hardware integration
-- Tracking thousands of satellites
+- Massive satellite tracking
 
-## 10. Security and Reliability
+## 13. Security
 
 - Store API keys in backend environment files
-- Validate all requests
-- Add rate limiting
-- Cache API responses
+- Use `.env`
+- Validate requests
 
-## 11. Analytics
+## 14. Analytics
 
 Track:
 - Feature usage
 - Alert engagement
-- AI interactions
+- AI usage
 
-Use:
-- Firebase Analytics
+## 15. Development Phases
 
-## 12. Phased Development
-
-### Phase 1
-
+Phase 1:
 - ISS tracking
 - Alerts
-- Basic AI
-- Basic UI
+- Ollama AI
 
-### Phase 2
-
-- 4D view
+Phase 2:
+- 4D visualization
 - ISS tour
 - Simulation
-- Health module
 
-### Phase 3
+Phase 3:
+- Advanced features
 
-- Multi-satellite support
-- Advanced AI
-- UI polish
+## 16. Final Product Statement
 
-## 13. Key Success Metrics
-
-- Alert accuracy
-- App performance
-- AI response relevance
-- User engagement
-
-## 14. Final Product Statement
-
-Space-Eye is a real-time, interactive, AI-powered space experience platform that brings space closer to the user through tracking, visualization, simulation, and intelligent guidance.
+Space-Eye is a real-time, AI-powered, offline-capable space experience platform that allows users to observe, explore, and understand space from their own perspective.

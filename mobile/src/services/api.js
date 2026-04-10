@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { secureStoreService } from './secureStoreService';
 
 const API_BASE_URL = 'http://10.0.2.2:5000/api';
 let cachedToken = null;
@@ -15,7 +15,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     if (!cachedToken) {
-      cachedToken = await SecureStore.getItemAsync('authToken');
+      cachedToken = await secureStoreService.getItemAsync('authToken');
     }
     if (cachedToken) {
       config.headers.Authorization = `Bearer ${cachedToken}`;
@@ -31,7 +31,7 @@ api.interceptors.response.use(
     const message = error.response?.data?.message || error.message || 'Network error';
     console.error('API Error:', message);
     if (error.response?.status === 401) {
-      await SecureStore.deleteItemAsync('authToken');
+      await secureStoreService.deleteItemAsync('authToken');
       cachedToken = null;
     }
     return Promise.reject({ message, status: error.response?.status });
@@ -77,6 +77,7 @@ export const aiAPI = {
     }),
   getHistory: () => api.get('/ai/history'),
   getSuggestions: () => api.get('/ai/suggestions'),
+  checkHealth: () => api.get('/ai/health'),
 };
 
 export const mediaAPI = {
@@ -98,6 +99,12 @@ export const authAPI = {
     api.post('/auth/login-google', { idToken, location }),
   getProfile: () => api.get('/auth/me'),
   updateProfile: (data) => api.put('/auth/profile', data),
+};
+
+export const settingsAPI = {
+  get: () => api.get('/settings'),
+  update: (settings) => api.put('/settings', settings),
+  reset: () => api.post('/settings/reset'),
 };
 
 export default api;

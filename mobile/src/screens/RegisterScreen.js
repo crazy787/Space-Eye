@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import Toast from 'react-native-root-toast';
+// Toast replaced with built-in Alert (no extra dependency needed)
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 import GradientButton from '../components/common/GradientButton';
@@ -51,12 +51,7 @@ export default function RegisterScreen({ navigation }) {
         routes: [{ name: 'MainTabs' }],
       });
     } else {
-      Toast.show(result.error, {
-        duration: 3000,
-        position: Toast.positions.BOTTOM,
-        shadow: true,
-        animation: true,
-      });
+      Alert.alert('Registration Failed', result.error);
     }
   };
 

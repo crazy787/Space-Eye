@@ -13,6 +13,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import GlassCard from '../components/common/GlassCard';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../styles/theme';
 import useISSPosition from '../hooks/useISSPosition';
+import { useOffline } from '../context/OfflineContext';
+import { useSettings } from '../context/SettingsContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,10 +32,20 @@ const DARK_MAP_STYLE = [
 
 export default function ISSTrackerScreen() {
   const { position, loading, error, history, refresh } = useISSPosition(5000);
+  const { isOnline, cachedISSPosition, cacheISSPosition } = useOffline();
+  const { formatSpeed, formatAltitude } = useSettings();
   const [mapFollowing, setMapFollowing] = useState(true);
   const [showStats, setShowStats] = useState(true);
   const mapRef = useRef(null);
   const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  // Use live position or cached fallback
+  const displayPosition = position || cachedISSPosition;
+
+  // Cache position when it updates
+  useEffect(() => {
+    if (position) cacheISSPosition(position);
+  }, [position]);
 
   // Pulse animation for ISS marker
   useEffect(() => {
@@ -49,18 +61,18 @@ export default function ISSTrackerScreen() {
 
   // Auto-center map on ISS
   useEffect(() => {
-    if (position && mapFollowing && mapRef.current) {
+    if (displayPosition && mapFollowing && mapRef.current) {
       mapRef.current.animateToRegion(
         {
-          latitude: position.latitude,
-          longitude: position.longitude,
+          latitude: displayPosition.latitude,
+          longitude: displayPosition.longitude,
           latitudeDelta: 40,
           longitudeDelta: 40,
         },
         500
       );
     }
-  }, [position, mapFollowing]);
+  }, [displayPosition, mapFollowing]);
 
   const orbitCoords = history.map((h) => ({
     latitude: h.lat,
@@ -75,8 +87,8 @@ export default function ISSTrackerScreen() {
         style={styles.map}
         customMapStyle={DARK_MAP_STYLE}
         initialRegion={{
-          latitude: position?.latitude || 0,
-          longitude: position?.longitude || 0,
+          latitude: displayPosition?.latitude || 0,
+          longitude: displayPosition?.longitude || 0,
           latitudeDelta: 50,
           longitudeDelta: 50,
         }}
@@ -93,11 +105,11 @@ export default function ISSTrackerScreen() {
         )}
 
         {/* ISS Marker */}
-        {position && (
+        {displayPosition && (
           <Marker
             coordinate={{
-              latitude: position.latitude,
-              longitude: position.longitude,
+              latitude: displayPosition.latitude,
+              longitude: displayPosition.longitude,
             }}
             anchor={{ x: 0.5, y: 0.5 }}
           >
@@ -121,8 +133,10 @@ export default function ISSTrackerScreen() {
             <View>
               <Text style={styles.headerTitle}>ISS Tracker</Text>
               <View style={styles.liveRow}>
-                <View style={styles.liveDot} />
-                <Text style={styles.liveText}>Real-time</Text>
+                <View style={[styles.liveDot, !isOnline && { backgroundColor: COLORS.warning }]} />
+                <Text style={[styles.liveText, !isOnline && { color: COLORS.warning }]}>
+                  {isOnline ? 'Real-time' : 'Cached'}
+                </Text>
               </View>
             </View>
             <View style={styles.headerActions}>
@@ -145,7 +159,7 @@ export default function ISSTrackerScreen() {
       </View>
 
       {/* Bottom Stats Panel */}
-      {showStats && position && (
+      {showStats && displayPosition && (
         <View style={styles.statsPanel}>
           <GlassCard style={styles.statsCard}>
             <TouchableOpacity
@@ -156,16 +170,16 @@ export default function ISSTrackerScreen() {
             </TouchableOpacity>
 
             <View style={styles.statsGrid}>
-              <StatItem label="LATITUDE" value={`${position.latitude?.toFixed(4)}°`} icon="location" />
-              <StatItem label="LONGITUDE" value={`${position.longitude?.toFixed(4)}°`} icon="navigate" />
-              <StatItem label="ALTITUDE" value="408 km" icon="resize" />
-              <StatItem label="SPEED" value="27,600 km/h" icon="speedometer" />
-              <StatItem label="REGION" value={position.region || '—'} icon="earth" />
+              <StatItem label="LATITUDE" value={`${displayPosition.latitude?.toFixed(4)}°`} icon="location" />
+              <StatItem label="LONGITUDE" value={`${displayPosition.longitude?.toFixed(4)}°`} icon="navigate" />
+              <StatItem label="ALTITUDE" value={formatAltitude(408)} icon="resize" />
+              <StatItem label="SPEED" value={formatSpeed(27600)} icon="speedometer" />
+              <StatItem label="REGION" value={displayPosition.region || '—'} icon="earth" />
               <StatItem
                 label="VISIBILITY"
-                value={position.isNighttime ? 'Possible' : 'Daytime'}
-                icon={position.isNighttime ? 'moon' : 'sunny'}
-                valueColor={position.isNighttime ? COLORS.issColor : COLORS.warning}
+                value={displayPosition.isNighttime ? 'Possible' : 'Daytime'}
+                icon={displayPosition.isNighttime ? 'moon' : 'sunny'}
+                valueColor={displayPosition.isNighttime ? COLORS.issColor : COLORS.warning}
               />
             </View>
           </GlassCard>

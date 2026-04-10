@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { optionalAuth } = require('../middleware/auth');
+const User = require('../models/User');
+const { optionalAuth, protect } = require('../middleware/auth');
 
 // Default user settings
 const DEFAULT_SETTINGS = {
@@ -24,57 +25,172 @@ const DEFAULT_SETTINGS = {
   },
 };
 
-// In-memory settings store (use MongoDB User model in production)
-const settingsStore = new Map();
-
 // @route   GET /api/settings
-// @desc    Get user settings
-router.get('/', optionalAuth, (req, res) => {
-  const userId = req.user?.id || 'anonymous';
-  const settings = settingsStore.get(userId) || DEFAULT_SETTINGS;
+// @desc    Get user settings (from User model if logged in, defaults if not)
+router.get('/', optionalAuth, async (req, res) => {
+  try {
+    if (req.user) {
+      // Build settings from User model preferences
+      const user = await User.findById(req.user._id);
+      const settings = {
+        alerts: {
+          enabled: user.preferences?.alertsEnabled ?? true,
+          alertBefore: user.preferences?.alertBeforeMinutes ?? 10,
+          minVisibility: user.preferences?.minVisibilitySeconds ?? 60,
+        },
+        satellites: user.preferences?.satellites || ['ISS'],
+        units: {
+          speed: user.preferences?.speedUnit || 'kmh',
+          altitude: user.preferences?.altitudeUnit || 'km',
+          temperature: user.preferences?.temperatureUnit || 'celsius',
+        },
+        theme: user.preferences?.theme || 'dark',
+        location: {
+          useGPS: user.preferences?.useGPS ?? true,
+          savedLat: user.location?.latitude || null,
+          savedLng: user.location?.longitude || null,
+          savedCity: user.location?.city || null,
+        },
+      };
 
-  res.json({
-    success: true,
-    data: settings,
-  });
+      return res.json({ success: true, data: settings });
+    }
+
+    // Anonymous user — return defaults
+    res.json({ success: true, data: DEFAULT_SETTINGS });
+  } catch (error) {
+    console.error('Settings fetch error:', error.message);
+    res.json({ success: true, data: DEFAULT_SETTINGS });
+  }
 });
 
 // @route   PUT /api/settings
-// @desc    Update user settings
-router.put('/', optionalAuth, (req, res) => {
-  const userId = req.user?.id || 'anonymous';
-  const current = settingsStore.get(userId) || { ...DEFAULT_SETTINGS };
-  const updates = req.body;
+// @desc    Update user settings (persists to User model)
+router.put('/', optionalAuth, async (req, res) => {
+  try {
+    const updates = req.body;
 
-  // Deep merge settings
-  const merged = {
-    alerts: { ...current.alerts, ...updates.alerts },
-    satellites: updates.satellites || current.satellites,
-    units: { ...current.units, ...updates.units },
-    theme: updates.theme || current.theme,
-    location: { ...current.location, ...updates.location },
-  };
+    if (req.user) {
+      const user = await User.findById(req.user._id);
 
-  settingsStore.set(userId, merged);
+      // Map settings to the User model's preferences
+      if (updates.alerts) {
+        if (updates.alerts.enabled !== undefined) {
+          user.preferences.alertsEnabled = updates.alerts.enabled;
+        }
+        if (updates.alerts.alertBefore !== undefined) {
+          user.preferences.alertBeforeMinutes = updates.alerts.alertBefore;
+        }
+        if (updates.alerts.minVisibility !== undefined) {
+          user.preferences.minVisibilitySeconds = updates.alerts.minVisibility;
+        }
+      }
 
-  res.json({
-    success: true,
-    data: merged,
-    message: 'Settings updated',
-  });
+      if (updates.satellites) {
+        user.preferences.satellites = updates.satellites.slice(0, 10); // Max 10
+      }
+
+      if (updates.units) {
+        if (updates.units.speed) user.preferences.speedUnit = updates.units.speed;
+        if (updates.units.altitude) user.preferences.altitudeUnit = updates.units.altitude;
+        if (updates.units.temperature) user.preferences.temperatureUnit = updates.units.temperature;
+      }
+
+      if (updates.theme) {
+        user.preferences.theme = updates.theme;
+      }
+
+      if (updates.location) {
+        if (updates.location.useGPS !== undefined) {
+          user.preferences.useGPS = updates.location.useGPS;
+        }
+        if (updates.location.savedLat !== undefined) {
+          user.location.latitude = updates.location.savedLat;
+        }
+        if (updates.location.savedLng !== undefined) {
+          user.location.longitude = updates.location.savedLng;
+        }
+        if (updates.location.savedCity !== undefined) {
+          user.location.city = updates.location.savedCity;
+        }
+      }
+
+      await user.save();
+
+      // Return the merged settings
+      const merged = {
+        alerts: {
+          enabled: user.preferences.alertsEnabled,
+          alertBefore: user.preferences.alertBeforeMinutes,
+          minVisibility: user.preferences.minVisibilitySeconds,
+        },
+        satellites: user.preferences.satellites,
+        units: {
+          speed: user.preferences.speedUnit,
+          altitude: user.preferences.altitudeUnit,
+          temperature: user.preferences.temperatureUnit,
+        },
+        theme: user.preferences.theme,
+        location: {
+          useGPS: user.preferences.useGPS,
+          savedLat: user.location?.latitude || null,
+          savedLng: user.location?.longitude || null,
+          savedCity: user.location?.city || null,
+        },
+      };
+
+      return res.json({ success: true, data: merged, message: 'Settings updated' });
+    }
+
+    // Anonymous user - return the sent settings back (not persisted)
+    const current = { ...DEFAULT_SETTINGS };
+    const merged = {
+      alerts: { ...current.alerts, ...updates.alerts },
+      satellites: updates.satellites || current.satellites,
+      units: { ...current.units, ...updates.units },
+      theme: updates.theme || current.theme,
+      location: { ...current.location, ...updates.location },
+    };
+
+    res.json({ success: true, data: merged, message: 'Settings updated (anonymous — not persisted)' });
+  } catch (error) {
+    console.error('Settings update error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to update settings' });
+  }
 });
 
 // @route   POST /api/settings/reset
 // @desc    Reset settings to defaults
-router.post('/reset', optionalAuth, (req, res) => {
-  const userId = req.user?.id || 'anonymous';
-  settingsStore.set(userId, { ...DEFAULT_SETTINGS });
+router.post('/reset', optionalAuth, async (req, res) => {
+  try {
+    if (req.user) {
+      const user = await User.findById(req.user._id);
 
-  res.json({
-    success: true,
-    data: DEFAULT_SETTINGS,
-    message: 'Settings reset to defaults',
-  });
+      user.preferences = {
+        alertsEnabled: true,
+        alertBeforeMinutes: 10,
+        minVisibilitySeconds: 60,
+        darkMode: true,
+        satellites: ['ISS'],
+        speedUnit: 'kmh',
+        altitudeUnit: 'km',
+        temperatureUnit: 'celsius',
+        theme: 'dark',
+        useGPS: true,
+      };
+
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      data: DEFAULT_SETTINGS,
+      message: 'Settings reset to defaults',
+    });
+  } catch (error) {
+    console.error('Settings reset error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to reset settings' });
+  }
 });
 
 module.exports = router;

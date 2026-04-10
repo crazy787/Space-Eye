@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import * as Google from 'expo-auth-session/providers/google';
 import { authAPI } from '../services/api';
 import { useLocation } from '../hooks/useLocation';
+import { secureStoreService } from '../services/secureStoreService';
 
 const AuthContext = createContext();
 
@@ -19,8 +19,8 @@ export function AuthProvider({ children }) {
 
   const loadTokens = async () => {
     try {
-      const storedToken = await SecureStore.getItemAsync('authToken');
-      const storedUser = await SecureStore.getItemAsync('authUser');
+      const storedToken = await secureStoreService.getItemAsync('authToken');
+      const storedUser = await secureStoreService.getItemAsync('authUser');
       
       if (storedToken && storedUser) {
         setToken(storedToken);
@@ -79,8 +79,8 @@ export function AuthProvider({ children }) {
     try {
       setToken(userData.token);
       setUser(userData);
-      await SecureStore.setItemAsync('authToken', userData.token);
-      await SecureStore.setItemAsync('authUser', JSON.stringify(userData));
+      await secureStoreService.setItemAsync('authToken', userData.token);
+      await secureStoreService.setItemAsync('authUser', JSON.stringify(userData));
     } catch (err) {
       console.error('Session save error:', err);
     }
@@ -90,8 +90,8 @@ export function AuthProvider({ children }) {
     try {
       setToken(null);
       setUser(null);
-      await SecureStore.deleteItemAsync('authToken');
-      await SecureStore.deleteItemAsync('authUser');
+      await secureStoreService.deleteItemAsync('authToken');
+      await secureStoreService.deleteItemAsync('authUser');
     } catch (err) {
       console.error('Logout error:', err);
     }
@@ -101,7 +101,7 @@ export function AuthProvider({ children }) {
     try {
       const updatedUser = await authAPI.updateProfile(data);
       setUser(updatedUser);
-      await SecureStore.setItemAsync('authUser', JSON.stringify(updatedUser));
+      await secureStoreService.setItemAsync('authUser', JSON.stringify(updatedUser));
       return { success: true, user: updatedUser };
     } catch (err) {
       return { success: false, error: err.message };

@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../styles/theme';
 import { aiAPI } from '../services/api';
+import { useOffline } from '../context/OfflineContext';
 
 const INITIAL_SUGGESTIONS = [
   { text: 'Where is the ISS right now?', icon: 'ISS' },
@@ -25,12 +26,30 @@ const INITIAL_SUGGESTIONS = [
 
 export default function AIAssistantScreen() {
   const route = useRoute();
+  const { isOnline } = useOffline();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [aiStatus, setAiStatus] = useState('checking'); // 'online' | 'offline' | 'checking'
   const flatListRef = useRef(null);
   const typingAnim = useRef(new Animated.Value(0)).current;
+
+  // Check AI health on mount and periodically
+  useEffect(() => {
+    checkAIHealth();
+    const interval = setInterval(checkAIHealth, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const checkAIHealth = async () => {
+    try {
+      const res = await aiAPI.checkHealth();
+      setAiStatus(res.data?.status === 'online' ? 'online' : 'offline');
+    } catch {
+      setAiStatus('offline');
+    }
+  };
 
   useEffect(() => {
     if (!isTyping) return undefined;
@@ -82,6 +101,7 @@ export default function AIAssistantScreen() {
           role: 'assistant',
           content: response.data.response,
           timestamp: new Date(),
+          offline: response.data.offline || false,
         };
 
         setMessages((prev) => [...prev, aiMessage]);
@@ -128,9 +148,17 @@ export default function AIAssistantScreen() {
           <Text style={[styles.messageText, isUser && styles.userMessageText]}>
             {item.content}
           </Text>
-          <Text style={styles.messageTime}>
-            {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Text>
+          <View style={styles.messageFooter}>
+            {item.offline && (
+              <View style={styles.offlineBadge}>
+                <Ionicons name="cloud-offline-outline" size={10} color="#FFB74D" />
+                <Text style={styles.offlineBadgeText}>Offline</Text>
+              </View>
+            )}
+            <Text style={styles.messageTime}>
+              {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          </View>
         </View>
 
         {isUser && (
@@ -185,8 +213,18 @@ export default function AIAssistantScreen() {
             <View>
               <Text style={styles.headerTitle}>AI Assistant</Text>
               <View style={styles.statusRow}>
-                <View style={styles.onlineDot} />
-                <Text style={styles.statusText}>Live context enabled</Text>
+                <View style={[
+                  styles.onlineDot,
+                  aiStatus === 'offline' && { backgroundColor: '#FFB74D' },
+                  aiStatus === 'checking' && { backgroundColor: COLORS.textMuted },
+                ]} />
+                <Text style={[
+                  styles.statusText,
+                  aiStatus === 'offline' && { color: '#FFB74D' },
+                  aiStatus === 'checking' && { color: COLORS.textMuted },
+                ]}>
+                  {aiStatus === 'online' ? 'Ollama connected' : aiStatus === 'offline' ? 'Offline mode' : 'Checking...'}
+                </Text>
               </View>
             </View>
           </View>
@@ -407,6 +445,27 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginTop: 4,
     textAlign: 'right',
+  },
+  messageFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 4,
+    gap: 6,
+  },
+  offlineBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(255, 152, 0, 0.12)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  offlineBadgeText: {
+    color: '#FFB74D',
+    fontSize: 9,
+    fontWeight: '700',
   },
   emptyContainer: {
     flex: 1,

@@ -33,8 +33,8 @@ app.use('/api/', apiLimiter);
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: '🚀 Space-Eye API v1.1',
-    version: '1.1.0',
+    message: '🚀 Space-Eye API v3.0',
+    version: '3.0.0',
     endpoints: {
       iss: '/api/iss',
       satellites: '/api/satellites',
@@ -88,9 +88,10 @@ process.on('SIGTERM', () => {
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 Space-Eye API Server v1.1`);
+  console.log(`\n🚀 Space-Eye API Server v3.0`);
   console.log(`📡 Running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🤖 AI Model: ${process.env.AI_MODEL || 'llama3'}`);
   console.log(`🔗 http://localhost:${PORT}\n`);
 });
 

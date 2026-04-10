@@ -171,10 +171,32 @@ router.post('/chat', aiLimiter, optionalAuth, async (req, res, next) => {
         sessionId: currentSessionId,
         usage: aiResponse.usage,
         context,
+        offline: aiResponse.offline || false,
       },
     });
   } catch (error) {
     next(error);
+  }
+});
+
+// @route   GET /api/ai/health
+// @desc    Check if AI (Ollama) backend is available
+router.get('/health', async (req, res) => {
+  try {
+    const isHealthy = await openaiService.checkHealth();
+    res.json({
+      success: true,
+      data: {
+        status: isHealthy ? 'online' : 'offline',
+        model: process.env.AI_MODEL || 'llama3',
+        baseUrl: process.env.AI_BASE_URL || 'http://localhost:11434/v1',
+      },
+    });
+  } catch (error) {
+    res.json({
+      success: true,
+      data: { status: 'offline', model: process.env.AI_MODEL || 'llama3' },
+    });
   }
 });
 

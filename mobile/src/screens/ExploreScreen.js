@@ -111,6 +111,15 @@ const IMMERSIVE_FEATURES = [
     accentColor: '#ef5350',
     badge: 'LIVE',
   },
+  {
+    id: 'AstronautLife',
+    title: 'Astronaut Life',
+    desc: 'Health effects, daily routine & zero-G life',
+    icon: 'body',
+    colors: ['#1a000a', '#33001a'],
+    accentColor: '#ce93d8',
+    badge: 'HEALTH',
+  },
 ];
 
 export default function ExploreScreen({ navigation }) {
@@ -465,7 +474,7 @@ const styles = StyleSheet.create({
   // Phase 2 Hub
   phase2Label: {
     color: COLORS.textMuted,
-    fontSize: FONT_SIZES.xs || 11,
+    fontSize: FONT_SIZES.caption || 11,
     fontWeight: '700',
     letterSpacing: 1.5,
     marginBottom: SPACING.sm,
@@ -490,9 +499,9 @@ const styles = StyleSheet.create({
     borderRadius: 8, borderWidth: 1,
   },
   phase2BadgeText: { fontSize: 9, fontWeight: '800', letterSpacing: 1.2 },
-  phase2Title: { color: COLORS.textPrimary, fontSize: FONT_SIZES.md || 15, fontWeight: '700' },
-  phase2Desc: { color: COLORS.textSecondary, fontSize: FONT_SIZES.xs || 11, lineHeight: 16 },
+  phase2Title: { color: COLORS.textPrimary, fontSize: FONT_SIZES.bodyLarge || 15, fontWeight: '700' },
+  phase2Desc: { color: COLORS.textSecondary, fontSize: FONT_SIZES.caption || 11, lineHeight: 16 },
   phase2Arrow: { marginTop: 4 },
-  phase2ArrowText: { fontSize: FONT_SIZES.sm || 13, fontWeight: '700' },
+  phase2ArrowText: { fontSize: FONT_SIZES.small || 13, fontWeight: '700' },
 });
 

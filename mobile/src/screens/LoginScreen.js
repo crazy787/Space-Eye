@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import Toast from 'react-native-root-toast';
+import Toast from 'react-native-toast-message';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 import GradientButton from '../components/common/GradientButton';
@@ -26,12 +26,20 @@ export default function LoginScreen({ navigation }) {
   const handleEmailLogin = async () => {
     setLoading(true);
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please fill in all fields'
+      });
       setLoading(false);
       return;
     }
     if (password.length < MIN_PASSWORD_LENGTH) {
-      Alert.alert('Error', `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+      });
       setLoading(false);
       return;
     }
@@ -43,19 +51,27 @@ export default function LoginScreen({ navigation }) {
         index: 0,
         routes: [{ name: 'MainTabs' }],
       });
+      Toast.show({
+        type: 'success',
+        text1: 'Login Successful',
+        text2: 'Welcome to Space-Eye!'
+      });
     } else {
-      Toast.show(result.error, {
-        duration: 3000,
-        position: Toast.positions.BOTTOM,
-        shadow: true,
-        animation: true,
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: result.error
       });
     }
   };
 
   const handleGoogleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please fill in all fields'
+      });
       setLoading(false);
       return;
     }
@@ -68,12 +84,16 @@ export default function LoginScreen({ navigation }) {
         index: 0,
         routes: [{ name: 'MainTabs' }],
       });
+      Toast.show({
+        type: 'success',
+        text1: 'Sign-in Successful',
+        text2: 'Welcome to Space-Eye!'
+      });
     } else {
-      Toast.show(result.error || 'Google sign-in failed', {
-        duration: 3000,
-        position: Toast.positions.BOTTOM,
-        shadow: true,
-        animation: true,
+      Toast.show({
+        type: 'error',
+        text1: 'Sign-in Failed',
+        text2: result.error || 'Google sign-in failed'
       });
     }
   };

@@ -28,6 +28,10 @@ import SatelliteTrackerScreen from '../screens/SatelliteTrackerScreen';
 import TelescopeScreen from '../screens/TelescopeScreen';
 import SpaceMediaScreen from '../screens/SpaceMediaScreen';
 
+// Phase 4 Screens
+import SettingsScreen from '../screens/SettingsScreen';
+import AstronautLifeScreen from '../screens/AstronautLifeScreen';
+
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -104,6 +108,10 @@ export default function AppNavigator() {
         <Stack.Screen name="Telescope" component={TelescopeScreen} options={{ animation: 'fade' }} />
         <Stack.Screen name="SpaceMedia" component={SpaceMediaScreen} options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ animation: 'slide_from_right' }} />
+
+        {/* Phase 4 */}
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="AstronautLife" component={AstronautLifeScreen} options={{ animation: 'slide_from_right' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

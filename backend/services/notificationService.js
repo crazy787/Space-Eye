@@ -1,11 +1,13 @@
 // Firebase Cloud Messaging notification service
 // Note: Full FCM integration requires firebase-admin SDK and service account credentials
-// This is a placeholder that can be expanded when Firebase is configured
+// When Firebase is configured, uncomment the firebase-admin lines below
+
+const User = require('../models/User');
 
 class NotificationService {
   constructor() {
     this.initialized = false;
-    // Initialize Firebase Admin when credentials are available
+    // Initialize Firebase Admin when credentials are available:
     // const admin = require('firebase-admin');
     // admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
     // this.messaging = admin.messaging();
@@ -64,7 +66,44 @@ class NotificationService {
   }
 
   /**
-   * Send ISS pass alert
+   * Send notification to a user by userId (looks up FCM token from User model)
+   * @param {string} userId - MongoDB user ID
+   * @param {Object} payload - { title, body, data }
+   */
+  async sendToUser(userId, payload) {
+    try {
+      const user = await User.findById(userId).select('fcmToken preferences');
+
+      if (!user) {
+        console.warn(`User ${userId} not found for notification`);
+        return { success: false, reason: 'user_not_found' };
+      }
+
+      // Check if user has notifications enabled
+      if (user.preferences?.alertsEnabled === false) {
+        console.log(`📱 [Skipped] User ${userId} has notifications disabled`);
+        return { success: false, reason: 'notifications_disabled' };
+      }
+
+      if (!user.fcmToken) {
+        console.log(`📱 [No Token] User ${userId} has no FCM token registered`);
+        return { success: false, reason: 'no_fcm_token' };
+      }
+
+      return this.sendNotification(
+        user.fcmToken,
+        payload.title,
+        payload.body,
+        payload.data || {}
+      );
+    } catch (error) {
+      console.error(`sendToUser error for ${userId}:`, error.message);
+      return { success: false, reason: 'send_error', error: error.message };
+    }
+  }
+
+  /**
+   * Send ISS pass alert to a specific device
    */
   async sendPassAlert(fcmToken, passData) {
     const title = '🛰️ ISS Passing Overhead!';
@@ -77,6 +116,23 @@ class NotificationService {
     };
 
     return this.sendNotification(fcmToken, title, body, data);
+  }
+
+  /**
+   * Send notification to multiple users
+   * @param {string[]} userIds - Array of MongoDB user IDs
+   * @param {Object} payload - { title, body, data }
+   */
+  async sendToUsers(userIds, payload) {
+    const results = await Promise.allSettled(
+      userIds.map((id) => this.sendToUser(id, payload))
+    );
+
+    const succeeded = results.filter((r) => r.status === 'fulfilled' && r.value.success).length;
+    const failed = results.length - succeeded;
+
+    console.log(`📱 Batch notification: ${succeeded} sent, ${failed} failed`);
+    return { succeeded, failed, total: results.length };
   }
 }
 

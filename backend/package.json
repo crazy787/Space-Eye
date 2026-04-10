@@ -1,7 +1,7 @@
 {
   "name": "space-eye-backend",
-  "version": "1.0.0",
-  "description": "Space-Eye API - ISS tracking, alerts, simulations, and AI assistance",
+  "version": "3.0.0",
+  "description": "Space-Eye API v3.0 - ISS tracking, alerts, simulations, Ollama AI, and offline support",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

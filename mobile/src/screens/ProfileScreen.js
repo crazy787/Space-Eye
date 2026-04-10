@@ -97,7 +97,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Preferences</Text>
           
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.settingContent}>
               <Ionicons name="notifications-outline" size={20} color={COLORS.textPrimary} />
               <Text style={styles.settingText}>Notifications</Text>
@@ -105,7 +105,7 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.settingContent}>
               <Ionicons name="moon-outline" size={20} color={COLORS.textPrimary} />
               <Text style={styles.settingText}>Dark Mode</Text>
@@ -113,10 +113,26 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.settingContent}>
               <Ionicons name="language-outline" size={20} color={COLORS.textPrimary} />
               <Text style={styles.settingText}>Units & Locale</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate('AstronautLife')}>
+            <View style={styles.settingContent}>
+              <Ionicons name="body-outline" size={20} color={COLORS.textPrimary} />
+              <Text style={styles.settingText}>Astronaut Life</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.settingItem, { borderBottomWidth: 0 }]} onPress={() => navigation.navigate('Settings')}>
+            <View style={styles.settingContent}>
+              <Ionicons name="settings-outline" size={20} color={COLORS.textPrimary} />
+              <Text style={styles.settingText}>All Settings</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
           </TouchableOpacity>
@@ -147,7 +163,7 @@ export default function ProfileScreen({ navigation }) {
         </TouchableOpacity>
 
         <View style={{ height: SPACING.xl }}>
-          <Text style={styles.versionText}>Space-Eye v1.1.0</Text>
+          <Text style={styles.versionText}>Space-Eye v3.0.0</Text>
         </View>
       </ScrollView>
     </View>

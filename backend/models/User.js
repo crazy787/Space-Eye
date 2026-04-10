@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema(
       alertBeforeMinutes: { type: Number, default: 10 },
       minVisibilitySeconds: { type: Number, default: 60 },
       darkMode: { type: Boolean, default: true },
+      satellites: { type: [String], default: ['ISS'] },
+      speedUnit: { type: String, enum: ['kmh', 'mph'], default: 'kmh' },
+      altitudeUnit: { type: String, enum: ['km', 'mi'], default: 'km' },
+      temperatureUnit: { type: String, enum: ['celsius', 'fahrenheit'], default: 'celsius' },
+      theme: { type: String, enum: ['dark', 'light', 'auto'], default: 'dark' },
+      useGPS: { type: Boolean, default: true },
     },
     fcmToken: {
       type: String,
