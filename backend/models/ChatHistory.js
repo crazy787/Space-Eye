@@ -40,7 +40,23 @@ const chatHistorySchema = new mongoose.Schema(
       userLocation: {
         latitude: Number,
         longitude: Number,
+        altitude: Number,
+        city: String,
+        country: String,
       },
+      nextPass: {
+        startTime: String,
+        endTime: String,
+        startDirection: String,
+        endDirection: String,
+        duration: Number,
+        durationFormatted: String,
+        minutesUntil: Number,
+        visibleNow: Boolean,
+        magnitude: Number,
+      },
+      appScreen: String,
+      userTimezone: String,
     },
   },
   {

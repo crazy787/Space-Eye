@@ -1,30 +1,28 @@
 # Space-Eye
 
-Space-Eye is a mobile app for real-time ISS tracking, location-based pass alerts, space education, immersive simulations, and an AI assistant that explains what users are seeing in context.
+Space-Eye is a real-time, interactive, AI-powered space experience platform that brings space closer to users through tracking, visualization, simulation, and intelligent guidance.
 
 ## Product Focus
 
-Space-Eye is designed to feel real-time, interactive, and educational without becoming a heavy scientific simulator. The primary audience includes space enthusiasts, students, parents, teachers, and curious users in India and globally.
+Space-Eye is designed to feel interactive, educational, and real-time without becoming a scientific-grade simulator. The primary audience includes space enthusiasts, students, parents, teachers, and curious users in India and globally.
 
-## Phase 1 Scope
+## Production Scope
 
-- AI assistant powered by OpenAI with real-time ISS and visibility context
+- AI assistant powered by OpenAI with screen-aware and location-aware context
 - Live ISS tracking with N2YO as the primary source and Open Notify as fallback
-- 4D space view with Earth, ISS orbit, Moon motion, and sunlight simulation
-- Selective satellite tracking focused on ISS and a small curated set of satellites
+- 4D space view with Earth rotation, ISS orbit, Moon motion, and sunlight simulation
+- Selective satellite tracking focused on ISS and a curated set of satellites
 - Location-based pass alerts with backend caching and notification support
-- Clean mobile onboarding and smooth core navigation
+- ISS 360 tour, launch simulation, astronaut learning content, and telescope-style exploration
+- Optional login, stored preferences, offline fallbacks, and analytics instrumentation
 
-## Phase 2 Scope
+## Backend Priorities
 
-- ISS 360 tour with hotspot-based exploration
-- Rocket launch and docking simulation
-- Astronaut life and health learning module
-- Telescope-style simulation mode
-
-## Optional Phase 1 Add-On
-
-- Live space media, including NASA or ISS video when available, with image fallbacks
+- API aggregation and rate limiting
+- Caching for ISS positions and pass predictions
+- AI context injection with ISS position, next pass, location, and current screen
+- Notification scheduling and timezone-aware formatting
+- Secure server-side API key handling
 
 ## Stack
 
@@ -46,6 +44,8 @@ External APIs (N2YO, NASA, OpenAI)
         ->
 MongoDB (cache, user preferences, chat history)
         ->
+Scheduler (cron jobs)
+        ->
 Firebase Cloud Messaging (alerts)
 ```
 
@@ -55,6 +55,7 @@ Firebase Cloud Messaging (alerts)
 - GPS-based visibility should include accuracy disclaimers
 - Timezone handling needs to stay explicit and testable
 - The app should remain performant on mid-range Android devices common in India
+- The app should keep useful last-known data and last-updated timestamps when live APIs fail
 
 ## Quick Start
 
@@ -80,6 +81,6 @@ Use [backend/.env.example](/C:/Users/22vam/Downloads/isstracker/backend/.env.exa
 
 ## Repo Guide
 
-- [docs/PRD.md](/C:/Users/22vam/Downloads/isstracker/docs/PRD.md): finalized product requirements
+- [docs/PRD.md](/C:/Users/22vam/Downloads/isstracker/docs/PRD.md): Space-Eye v1.1 production PRD
 - [backend](/C:/Users/22vam/Downloads/isstracker/backend): Express API, MongoDB models, integrations
 - [mobile](/C:/Users/22vam/Downloads/isstracker/mobile): Expo app, navigation, screens, hooks, styles

@@ -1,189 +1,308 @@
-# Space-Eye v1.0 PRD
+# Space-Eye v1.1 Production PRD
 
-## 1. Product Summary
+## 1. Product Overview
 
-Space-Eye is a beautiful, educational mobile app that brings space closer to everyone.
+Space-Eye is a mobile application that allows users to:
 
-It combines real-time satellite tracking, location-based visibility alerts, immersive visualizations, guided simulations, and a smart AI assistant in one clean mobile experience.
+- Track the International Space Station and selected satellites in real time
+- Receive location-based visibility alerts
+- Explore space through 3D and 4D visualization
+- Experience a 360 degree ISS interior tour
+- Understand rocket launches and docking through guided simulation
+- Learn about astronaut life and space health
+- Interact with an AI assistant for contextual space queries
 
-Core promise:
-Real-time + Interactive + Educational
+## 2. Product Positioning
 
-This product is not meant to be a complex NASA-grade simulator.
+- Interactive
+- Educational
+- Real-time
+- Personal space companion based on user location
 
-Target users:
-- Space enthusiasts
-- Students aged 12+
-- Parents and teachers
-- Curious users in India and globally
+Space-Eye is not a scientific-grade simulator.
 
-Key differentiators:
-- Accurate ISS and limited satellite tracking with smart alerts
-- 360 degree ISS interior tour
-- Rocket launch and docking simulation
-- Context-aware AI that explains what the user is seeing
-- Telescope-style zoom simulation
+## 3. Core Features
 
-## 2. Core Features
+### 3.1 AI Assistant
 
-### 2.1 AI Assistant
+Use:
+- OpenAI
 
-- Powered by OpenAI using GPT-4o or GPT-4o-mini
-- Answers general space questions
-- Combines static knowledge with real-time tracking data
-- Uses screen and feature context when available
+Capabilities:
+- Answer space-related questions
+- Use real-time ISS and satellite data
+- Provide contextual responses based on user state
 
-Example queries:
-- Can I see the ISS now from Hyderabad?
-- Why do astronauts float?
-- Explain the docking process
-- Show me Starlink near me
+Backend context injection before an AI request should include:
+- User location, such as latitude and longitude or city
+- Current ISS position
+- Next ISS pass time
+- Current app screen
 
-### 2.2 ISS Live Tracking
+Example:
+- User asks, "Can I see ISS now?"
+- System enriches the request with location and pass data before sending it to the model
 
-- Primary source: N2YO API
-- Fallback source: Open Notify
-- Shows latitude, longitude, speed, altitude, and orbit path
-- Backend should cache updates and refresh roughly every 5 to 10 seconds
+### 3.2 ISS Live Tracking
 
-### 2.3 4D Space View
+Use:
+- N2YO API
+- Open Notify API as fallback
 
-- Interactive 3D space scene
-- Earth with day and night rotation
+Features:
+- Real-time latitude and longitude
+- Speed around 28,000 km/h
+- Altitude
+- Orbit path visualization
+
+Backend behavior:
+- Cache position every 5 to 10 seconds
+- Serve cached data to clients
+
+### 3.3 4D Space Visualization
+
+Definition:
+- 3D space plus time-based motion
+
+Features:
+- Earth rotation with day and night cycle
 - ISS orbit animation
 - Simplified Moon orbit
-- Dynamic Sun lighting
-- Motion is pre-calculated and animation-driven, not physics-simulated
+- Sun lighting
 
-### 2.4 Selective Satellite Tracking
+Constraints:
+- Pre-calculated animation
+- No real-time physics engine
 
-- Primary: ISS
-- Secondary: 2 to 3 popular Starlink satellites
-- Optional categories: weather satellites and GPS satellites
-- Never track all satellites at once
+### 3.4 Satellite Tracking
 
-### 2.5 Nearby Alert System
+Use:
+- N2YO API
 
-- Uses N2YO Visual Passes API
-- Uses Firebase Cloud Messaging
-- Sends alerts about 10 minutes before an ISS pass
-- Includes pass direction, visibility duration, and visible-now status
-- Flow: GPS -> pass lookup -> local time conversion -> notification
+Scope:
+- ISS as the primary object
+- Limited Starlink satellites, roughly 2 to 3
+- Optional weather and GPS satellites
 
-### 2.6 ISS 360 Tour
+Rules:
+- Do not track all satellites
+- Filter by visibility or relevance
 
-- Full 360 degree interior exploration
-- Hotspots for sleeping quarters, Cupola, eating area, and labs
-- Uses Pannellum or equivalent inside a React Native WebView
-- Uses NASA public-domain assets
+### 3.5 Nearby Alert System
 
-### 2.7 Rocket Launch and Docking Simulation
+Components:
+- N2YO Visual Passes API
+- Firebase Cloud Messaging
 
-- Guided sequence from launch to docking
-- Covers booster separation, orbit insertion, approach, and docking
-- Uses animation-based visuals with educational progress indicators
+Features:
+- Upcoming ISS pass notifications
+- 10-minute pre-alert
+- Visible-now alert
+- Direction such as NW to SE
+- Duration
 
-### 2.8 Astronaut Life and Health Module
+Backend flow:
+- Fetch passes periodically
+- Store upcoming passes
+- Convert UTC to local time
+- Trigger FCM
 
-- Explains zero gravity, muscle loss, bone density loss, fluid shift, and routines
-- Uses simple visuals and animations
-- AI can elaborate when the user asks follow-up questions
+Scheduler:
+- Cron job every 5 to 10 minutes
 
-### 2.9 Telescope Simulation Mode
+### 3.6 ISS 360 Tour
 
-- Simulated zoom into the ISS, Earth, and Moon
-- No real telescope hardware feed
-- Optimized for performance and believable presentation
+Features:
+- 360 degree interior exploration
+- Hotspots for sleeping area, eating area, Cupola, and lab modules
 
-### 2.10 Live Space Media
+Tech:
+- Pannellum inside a WebView
 
-- Optional for phase 1
-- Can embed NASA HDEV or similar live Earth view when available
-- Should fall back to high-quality static media
+### 3.7 Rocket Launch and Docking Simulation
 
-## 3. Technical Stack
+Flow:
+- Launch
+- Booster separation
+- Orbit insertion
+- Approach ISS
+- Docking
 
-- Frontend: React Native with Expo
-- Backend: Node.js with Express
-- Database: MongoDB Atlas free tier
-- 3D and visualization: Three.js based rendering
-- 360 viewer: Pannellum via WebView
-- Notifications: Firebase Cloud Messaging
-- APIs: N2YO, Open Notify, NASA Open APIs, OpenAI
+Features:
+- Speed indicator
+- Altitude progression
 
-Performance targets:
-- 60 FPS on mid-range Android devices
-- App size under 120 MB
-- Useful offline behavior through caching
+Implementation:
+- Animation-based using Lottie or Three.js
 
-## 4. System Architecture
+### 3.8 Astronaut Life and Health Module
+
+Topics:
+- Zero gravity effects
+- Muscle atrophy
+- Bone density loss
+- Fluid shift
+- Daily routines
+
+Features:
+- Visual explanations
+- AI expansion on demand
+
+### 3.9 Telescope Simulation Mode
+
+Features:
+- Zoom into ISS
+- Zoom into Earth
+- Zoom into Moon
+
+Notes:
+- Fully simulated
+- No real telescope integration
+
+### 3.10 User System and Preferences
+
+Features:
+- Optional login with Google or email
+- Store preferred location
+- Store alert settings
+- Store selected satellites
+
+### 3.11 Settings Module
+
+Controls:
+- Enable or disable alerts
+- Select satellites
+- Choose units such as km/h or mph
+- Theme control as an optional feature
+
+### 3.12 Offline and Fallback Handling
+
+Features:
+- Cache the last ISS position
+- Show a last-updated timestamp
+- Provide graceful fallback UI
+
+### 3.13 Live Space Media
+
+Optional feature:
+- NASA ISS live Earth feed
+- Embedded video streams
+
+## 4. Technical Architecture
+
+Frontend:
+- React Native with Expo
+
+Backend:
+- Node.js with Express
+
+Database:
+- MongoDB
+
+APIs:
+- N2YO API
+- NASA Open APIs
+- Open Notify API
+- OpenAI
+
+Notifications:
+- Firebase Cloud Messaging
+
+## 5. System Architecture
 
 ```text
 Mobile App (React Native)
         ->
-Backend API (Node.js + Express)
+Backend (Node.js + Express)
         ->
-External APIs (N2YO, NASA, OpenAI)
+Caching Layer (MongoDB)
         ->
-MongoDB (caching positions, user preferences)
+External APIs:
+   - N2YO
+   - NASA
+   - OpenAI
         ->
-Firebase Cloud Messaging (alerts)
+Scheduler (Cron Jobs)
+        ->
+Firebase Cloud Messaging
 ```
 
-## 5. Core User Flows
+## 6. Backend Responsibilities
 
-1. Home or Tracking -> live ISS position and 4D view
-2. Alerts -> notification -> pass details
-3. Explore -> ISS tour or Telescope mode
-4. Simulate -> launch and docking flow
-5. Learn -> astronaut health content and AI chat
+- API aggregation
+- Data caching
+- Rate limiting
+- AI context injection
+- Notification scheduling
+- Timezone conversion
 
-## 6. Constraints and Non-Goals
+## 7. User Flows
 
-Constraints:
-- N2YO rate limits require backend caching
-- 3D rendering must respect device performance
-- GPS accuracy needs user-facing disclaimers
-- Timezone handling must be correct across locales
+- Tracking: open app, view ISS live, explore orbit
+- Alert: receive notification, open app, review direction and time
+- Exploration: open ISS tour and interact with modules
+- Simulation: run a rocket mission and observe docking
+- AI: ask a question and receive a contextual response
 
-Out of scope for v1.0:
-- Full real-time solar system physics
-- Real telescope control or live telescope hardware feeds
+## 8. Constraints
+
+- API rate limits, especially from N2YO
+- Device performance for 3D rendering
+- GPS accuracy
+- Timezone handling
+
+## 9. Non-Goals
+
+- Full real-time physics simulation
+- Real telescope hardware integration
 - Tracking thousands of satellites
-- AR mode
 
-## 7. Phased Plan
+## 10. Security and Reliability
+
+- Store API keys in backend environment files
+- Validate all requests
+- Add rate limiting
+- Cache API responses
+
+## 11. Analytics
+
+Track:
+- Feature usage
+- Alert engagement
+- AI interactions
+
+Use:
+- Firebase Analytics
+
+## 12. Phased Development
 
 ### Phase 1
 
-- ISS live tracking and alerts
-- Basic AI assistant
-- Simple 4D space view
-- Clean UI and onboarding
+- ISS tracking
+- Alerts
+- Basic AI
+- Basic UI
 
 ### Phase 2
 
-- ISS 360 tour
-- Rocket and docking simulation
-- Astronaut health module
-- Telescope simulation
+- 4D view
+- ISS tour
+- Simulation
+- Health module
 
 ### Phase 3
 
 - Multi-satellite support
-- Advanced AI and personalization
-- Product polish and monetization
+- Advanced AI
+- UI polish
 
-## 8. Positioning
+## 13. Key Success Metrics
 
-Space-Eye is an interactive, real-time, educational space companion that should feel fun and premium.
+- Alert accuracy
+- App performance
+- AI response relevance
+- User engagement
 
-It is not a scientific-grade simulator or satellite control system.
+## 14. Final Product Statement
 
-## 9. Success Factors
-
-- Smooth UI and UX
-- Accurate, timely alerts
-- Simple and engaging explanations
-- Strong context-aware AI responses
-- Reliable experience on common phones in India
+Space-Eye is a real-time, interactive, AI-powered space experience platform that brings space closer to the user through tracking, visualization, simulation, and intelligent guidance.

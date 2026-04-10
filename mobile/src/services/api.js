@@ -1,8 +1,8 @@
 import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
 
-// Base API URL - update this for production
-const API_BASE_URL = 'http://10.0.2.2:5000/api'; // Android emulator
-// const API_BASE_URL = 'http://localhost:5000/api'; // iOS simulator
+const API_BASE_URL = 'http://10.0.2.2:5000/api';
+let cachedToken = null;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -12,23 +12,28 @@ const api = axios.create({
   },
 });
 
-// Request interceptor
 api.interceptors.request.use(
-  (config) => {
-    // Token will be set dynamically after login
-    // const token = getToken();
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    if (!cachedToken) {
+      cachedToken = await SecureStore.getItemAsync('authToken');
+    }
+    if (cachedToken) {
+      config.headers.Authorization = `Bearer ${cachedToken}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
 api.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
     const message = error.response?.data?.message || error.message || 'Network error';
     console.error('API Error:', message);
+    if (error.response?.status === 401) {
+      await SecureStore.deleteItemAsync('authToken');
+      cachedToken = null;
+    }
     return Promise.reject({ message, status: error.response?.status });
   }
 );
@@ -61,8 +66,15 @@ export const alertAPI = {
 };
 
 export const aiAPI = {
-  chat: (message, sessionId, userLocation) =>
-    api.post('/ai/chat', { message, sessionId, userLocation }),
+  chat: (message, options = {}) =>
+    api.post('/ai/chat', {
+      message,
+      sessionId: options.sessionId,
+      userLocation: options.userLocation,
+      currentScreen: options.currentScreen,
+      userTimezone: options.userTimezone,
+      includeContext: options.includeContext !== false,
+    }),
   getHistory: () => api.get('/ai/history'),
   getSuggestions: () => api.get('/ai/suggestions'),
 };
@@ -82,6 +94,8 @@ export const authAPI = {
     api.post('/auth/register', { name, email, password }),
   login: (email, password) =>
     api.post('/auth/login', { email, password }),
+  loginGoogle: (idToken, location) =>
+    api.post('/auth/login-google', { idToken, location }),
   getProfile: () => api.get('/auth/me'),
   updateProfile: (data) => api.put('/auth/profile', data),
 };

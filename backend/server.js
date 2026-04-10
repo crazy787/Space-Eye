@@ -5,16 +5,20 @@ const morgan = require('morgan');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { apiLimiter } = require('./middleware/rateLimit');
+const scheduler = require('./services/scheduler');
 
 // Initialize Express
 const app = express();
 
 // Connect to MongoDB
-connectDB();
+connectDB().then(() => {
+  // Start scheduler once DB is connected
+  scheduler.start();
+});
 
 // Middleware
 app.use(cors({
-  origin: '*', // In production, restrict to your app's domain
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -29,8 +33,8 @@ app.use('/api/', apiLimiter);
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: '🚀 Space-Eye API is running!',
-    version: '1.0.0',
+    message: '🚀 Space-Eye API v1.1',
+    version: '1.1.0',
     endpoints: {
       iss: '/api/iss',
       satellites: '/api/satellites',
@@ -38,16 +42,20 @@ app.get('/', (req, res) => {
       ai: '/api/ai',
       media: '/api/media',
       auth: '/api/auth',
+      settings: '/api/settings',
     },
   });
 });
 
 app.get('/api/health', (req, res) => {
+  const cacheService = require('./services/cacheService');
   res.json({
     success: true,
     status: 'healthy',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
+    cache: cacheService.getLastUpdated(),
+    scheduler: scheduler.isRunning ? 'running' : 'stopped',
   });
 });
 
@@ -58,6 +66,7 @@ app.use('/api/satellites', require('./routes/satellites'));
 app.use('/api/alerts', require('./routes/alerts'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/media', require('./routes/media'));
+app.use('/api/settings', require('./routes/settings'));
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -70,10 +79,16 @@ app.use('*', (req, res) => {
 // Error handler
 app.use(errorHandler);
 
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  scheduler.stop();
+  process.exit(0);
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 Space-Eye API Server`);
+  console.log(`\n🚀 Space-Eye API Server v1.1`);
   console.log(`📡 Running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 http://localhost:${PORT}\n`);

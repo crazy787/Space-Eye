@@ -13,6 +13,11 @@ import AIAssistantScreen from '../screens/AIAssistantScreen';
 import AlertsScreen from '../screens/AlertsScreen';
 import ExploreScreen from '../screens/ExploreScreen';
 
+// Auth Screens
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+
 // Phase 2 Screens
 import SpaceViewScreen from '../screens/SpaceViewScreen';
 import ISSTourScreen from '../screens/ISSTourScreen';
@@ -82,6 +87,10 @@ export default function AppNavigator() {
       }}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {/* Auth */}
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+
         {/* Main App */}
         <Stack.Screen name="MainTabs" component={MainTabs} />
 
@@ -94,6 +103,7 @@ export default function AppNavigator() {
         <Stack.Screen name="SatelliteTracker" component={SatelliteTrackerScreen} options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="Telescope" component={TelescopeScreen} options={{ animation: 'fade' }} />
         <Stack.Screen name="SpaceMedia" component={SpaceMediaScreen} options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ animation: 'slide_from_right' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

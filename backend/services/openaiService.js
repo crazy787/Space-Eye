@@ -18,6 +18,7 @@ Guidelines:
 - When discussing ISS visibility, mention direction, timing, and brightness
 - If the user asks about current ISS position, reference the real-time data provided in context
 - If the user is on a simulation or learning screen, tailor the explanation to what they are viewing
+- If user location or next pass data is available, use it directly instead of speaking in generalities
 - Be educational, approachable, and accurate over being overly dramatic
 - For complex topics, break them into simple, digestible steps
 - Be enthusiastic about space exploration
@@ -34,6 +35,7 @@ You may receive real-time tracking data in the conversation context.`;
         ...(process.env.AI_BASE_URL ? { baseURL: process.env.AI_BASE_URL } : {}),
       });
     }
+
     return this._client;
   }
 
@@ -41,16 +43,9 @@ You may receive real-time tracking data in the conversation context.`;
     return process.env.AI_MODEL || 'gpt-4o-mini';
   }
 
-  /**
-   * Send a message to the AI and get a response
-   * @param {Array} messages - Conversation history
-   * @param {Object} context - Real-time data context (ISS position, etc.)
-   */
   async chat(messages, context = null) {
     try {
-      const systemMessages = [
-        { role: 'system', content: this.systemPrompt },
-      ];
+      const systemMessages = [{ role: 'system', content: this.systemPrompt }];
 
       if (context) {
         let contextStr = '\n\n--- REAL-TIME DATA ---\n';
@@ -58,14 +53,35 @@ You may receive real-time tracking data in the conversation context.`;
         if (context.issPosition) {
           contextStr += `ISS Current Position: Lat ${context.issPosition.latitude} deg, Lng ${context.issPosition.longitude} deg\n`;
         }
+
         if (context.astronauts) {
-          contextStr += `People in space: ${context.astronauts.number} (${context.astronauts.people?.map((a) => `${a.name} on ${a.craft}`).join(', ')})\n`;
+          contextStr += `People in space: ${context.astronauts.number} (${context.astronauts.people?.map((person) => `${person.name} on ${person.craft}`).join(', ')})\n`;
         }
+
         if (context.userLocation) {
-          contextStr += `User Location: Lat ${context.userLocation.latitude} deg, Lng ${context.userLocation.longitude} deg\n`;
+          contextStr += `User Location: Lat ${context.userLocation.latitude} deg, Lng ${context.userLocation.longitude} deg`;
+
+          if (context.userLocation.city) {
+            contextStr += `, City ${context.userLocation.city}`;
+          }
+
+          if (context.userLocation.country) {
+            contextStr += `, Country ${context.userLocation.country}`;
+          }
+
+          contextStr += '\n';
         }
+
         if (context.nextPass) {
-          contextStr += `Next ISS pass for user: ${context.nextPass}\n`;
+          contextStr += `Next ISS pass: ${context.nextPass.startTime}, Direction ${context.nextPass.startDirection} to ${context.nextPass.endDirection}, Duration ${context.nextPass.durationFormatted}, Minutes until ${context.nextPass.minutesUntil}, Visible now ${context.nextPass.visibleNow}\n`;
+        }
+
+        if (context.appScreen) {
+          contextStr += `Current App Screen: ${context.appScreen}\n`;
+        }
+
+        if (context.userTimezone) {
+          contextStr += `User Timezone: ${context.userTimezone}\n`;
         }
 
         contextStr += '--- END DATA ---';
@@ -93,9 +109,6 @@ You may receive real-time tracking data in the conversation context.`;
     }
   }
 
-  /**
-   * Generate a title for a conversation
-   */
   async generateTitle(firstMessage) {
     try {
       const response = await this.client.chat.completions.create({

@@ -10,43 +10,49 @@ import {
   Platform,
   Animated,
 } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../styles/theme';
-import GlassCard from '../components/common/GlassCard';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../styles/theme';
 import { aiAPI } from '../services/api';
 
 const INITIAL_SUGGESTIONS = [
-  { text: 'Where is the ISS right now?', icon: '🛰️' },
-  { text: 'Can I see the ISS tonight?', icon: '🌙' },
-  { text: 'How many people are in space?', icon: '👨‍🚀' },
-  { text: 'Why do astronauts float?', icon: '🌌' },
+  { text: 'Where is the ISS right now?', icon: 'ISS' },
+  { text: 'Can I see the ISS tonight?', icon: 'MOON' },
+  { text: 'Show me Starlink near me', icon: 'SAT' },
+  { text: 'Why do astronauts float?', icon: 'ZERO G' },
 ];
 
 export default function AIAssistantScreen() {
+  const route = useRoute();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const flatListRef = useRef(null);
-  const inputRef = useRef(null);
   const typingAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (isTyping) {
-      const dots = Animated.loop(
-        Animated.sequence([
-          Animated.timing(typingAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-          Animated.timing(typingAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
-        ])
-      );
-      dots.start();
-      return () => dots.stop();
-    }
-  }, [isTyping]);
+    if (!isTyping) return undefined;
+
+    const dots = Animated.loop(
+      Animated.sequence([
+        Animated.timing(typingAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(typingAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ])
+    );
+
+    dots.start();
+    return () => dots.stop();
+  }, [isTyping, typingAnim]);
 
   const sendMessage = async (text) => {
     if (!text.trim()) return;
+
+    const userTimezone =
+      typeof Intl === 'object' && typeof Intl.DateTimeFormat === 'function'
+        ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+        : 'UTC';
 
     const userMessage = {
       id: Date.now().toString(),
@@ -60,10 +66,16 @@ export default function AIAssistantScreen() {
     setIsTyping(true);
 
     try {
-      const response = await aiAPI.chat(text.trim(), sessionId);
+      const response = await aiAPI.chat(text.trim(), {
+        sessionId,
+        currentScreen: route.name,
+        userTimezone,
+      });
 
       if (response.success) {
-        if (!sessionId) setSessionId(response.data.sessionId);
+        if (!sessionId) {
+          setSessionId(response.data.sessionId);
+        }
 
         const aiMessage = {
           id: (Date.now() + 1).toString(),
@@ -78,7 +90,7 @@ export default function AIAssistantScreen() {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I'm having trouble connecting right now. Please try again in a moment! 🛰️",
+        content: "I'm having trouble connecting right now. Please try again in a moment.",
         timestamp: new Date(),
         isError: true,
       };
@@ -90,6 +102,7 @@ export default function AIAssistantScreen() {
 
   const renderMessage = ({ item }) => {
     const isUser = item.role === 'user';
+
     return (
       <Animated.View
         style={[
@@ -100,10 +113,11 @@ export default function AIAssistantScreen() {
         {!isUser && (
           <View style={styles.avatarContainer}>
             <LinearGradient colors={COLORS.gradientGlow} style={styles.avatar}>
-              <Text style={styles.avatarText}>🤖</Text>
+              <Text style={styles.avatarText}>AI</Text>
             </LinearGradient>
           </View>
         )}
+
         <View
           style={[
             styles.messageBubble,
@@ -118,6 +132,7 @@ export default function AIAssistantScreen() {
             {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </Text>
         </View>
+
         {isUser && (
           <View style={styles.avatarContainer}>
             <LinearGradient colors={COLORS.gradientPrimary} style={styles.avatar}>
@@ -132,17 +147,17 @@ export default function AIAssistantScreen() {
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIcon}>
-        <Text style={styles.emptyEmoji}>🚀</Text>
+        <Text style={styles.emptyEmoji}>AI</Text>
       </View>
       <Text style={styles.emptyTitle}>Space-Eye AI</Text>
       <Text style={styles.emptyDesc}>
-        Ask me anything about space, the ISS, {'\n'}astronauts, or satellites!
+        Ask me about the ISS, satellite visibility,{'\n'}astronaut life, or docking.
       </Text>
 
       <View style={styles.suggestionsContainer}>
-        {INITIAL_SUGGESTIONS.map((suggestion, index) => (
+        {INITIAL_SUGGESTIONS.map((suggestion) => (
           <TouchableOpacity
-            key={index}
+            key={suggestion.text}
             style={styles.suggestionCard}
             activeOpacity={0.7}
             onPress={() => sendMessage(suggestion.text)}
@@ -158,7 +173,6 @@ export default function AIAssistantScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <LinearGradient
         colors={['rgba(11, 13, 23, 1)', 'rgba(11, 13, 23, 0.95)']}
         style={styles.header}
@@ -166,16 +180,17 @@ export default function AIAssistantScreen() {
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
             <LinearGradient colors={COLORS.gradientGlow} style={styles.headerAvatar}>
-              <Text style={{ fontSize: 20 }}>🤖</Text>
+              <Text style={styles.headerAvatarText}>AI</Text>
             </LinearGradient>
             <View>
               <Text style={styles.headerTitle}>AI Assistant</Text>
               <View style={styles.statusRow}>
                 <View style={styles.onlineDot} />
-                <Text style={styles.statusText}>Online • Real-time data</Text>
+                <Text style={styles.statusText}>Live context enabled</Text>
               </View>
             </View>
           </View>
+
           <TouchableOpacity
             style={styles.clearBtn}
             onPress={() => {
@@ -188,7 +203,6 @@ export default function AIAssistantScreen() {
         </View>
       </LinearGradient>
 
-      {/* Messages */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.chatContainer}
@@ -212,27 +226,24 @@ export default function AIAssistantScreen() {
           showsVerticalScrollIndicator={false}
         />
 
-        {/* Typing Indicator */}
         {isTyping && (
           <View style={styles.typingContainer}>
             <LinearGradient colors={COLORS.gradientGlow} style={styles.typingAvatar}>
-              <Text style={{ fontSize: 12 }}>🤖</Text>
+              <Text style={styles.typingAvatarText}>AI</Text>
             </LinearGradient>
             <Animated.View style={[styles.typingBubble, { opacity: typingAnim }]}>
               <View style={styles.typingDots}>
-                <View style={[styles.dot, styles.dot1]} />
-                <View style={[styles.dot, styles.dot2]} />
-                <View style={[styles.dot, styles.dot3]} />
+                <View style={styles.dot} />
+                <View style={styles.dot} />
+                <View style={styles.dot} />
               </View>
             </Animated.View>
           </View>
         )}
 
-        {/* Input Bar */}
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
             <TextInput
-              ref={inputRef}
               style={styles.textInput}
               placeholder="Ask about space..."
               placeholderTextColor={COLORS.textMuted}
@@ -271,8 +282,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bgPrimary,
   },
-
-  // Header
   header: {
     paddingTop: 50,
     paddingBottom: SPACING.md,
@@ -296,6 +305,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerAvatarText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   headerTitle: {
     fontSize: FONT_SIZES.subtitle,
@@ -326,8 +340,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // Chat
   chatContainer: {
     flex: 1,
   },
@@ -338,8 +350,6 @@ const styles = StyleSheet.create({
   emptyList: {
     flex: 1,
   },
-
-  // Messages
   messageRow: {
     flexDirection: 'row',
     marginBottom: SPACING.md,
@@ -362,7 +372,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    fontSize: 14,
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   messageBubble: {
     maxWidth: '72%',
@@ -396,8 +408,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'right',
   },
-
-  // Empty
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
@@ -416,7 +426,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.surfaceBorder,
   },
   emptyEmoji: {
-    fontSize: 36,
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   emptyTitle: {
     fontSize: FONT_SIZES.title,
@@ -446,15 +458,16 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   suggestionIcon: {
-    fontSize: 20,
+    width: 52,
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
   suggestionText: {
     flex: 1,
     fontSize: FONT_SIZES.body,
     color: COLORS.textPrimary,
   },
-
-  // Typing
   typingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -468,6 +481,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  typingAvatarText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
   typingBubble: {
     backgroundColor: COLORS.bgTertiary,
@@ -487,8 +505,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: COLORS.textMuted,
   },
-
-  // Input
   inputContainer: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
