@@ -1,0 +1,46 @@
+// API Base URLs
+const N2YO_BASE_URL = 'https://api.n2yo.com/rest/v1/satellite';
+const OPEN_NOTIFY_BASE_URL = 'http://api.open-notify.org';
+const NASA_BASE_URL = 'https://api.nasa.gov';
+
+// Satellite NORAD IDs
+const NORAD_IDS = {
+  ISS: 25544,
+  HUBBLE: 20580,
+  TIANGONG: 48274,
+};
+
+// Satellite categories for N2YO
+const SATELLITE_CATEGORIES = {
+  BRIGHTEST: 1,
+  ISS: 2,
+  WEATHER: 3,
+  EARTH_RESOURCES: 6,
+  GPS_OPERATIONAL: 20,
+  STARLINK: 52,
+  SCIENCE: 8,
+};
+
+// ISS Constants
+const ISS_ORBITAL_SPEED_KMH = 27600;
+const ISS_ALTITUDE_KM = 408;
+const ISS_ORBITAL_PERIOD_MIN = 92;
+
+// Alert defaults
+const DEFAULT_ALERT_DAYS = 10;
+const DEFAULT_MIN_VISIBILITY_SECONDS = 60;
+const DEFAULT_ALERT_BEFORE_MINUTES = 10;
+
+module.exports = {
+  N2YO_BASE_URL,
+  OPEN_NOTIFY_BASE_URL,
+  NASA_BASE_URL,
+  NORAD_IDS,
+  SATELLITE_CATEGORIES,
+  ISS_ORBITAL_SPEED_KMH,
+  ISS_ALTITUDE_KM,
+  ISS_ORBITAL_PERIOD_MIN,
+  DEFAULT_ALERT_DAYS,
+  DEFAULT_MIN_VISIBILITY_SECONDS,
+  DEFAULT_ALERT_BEFORE_MINUTES,
+};

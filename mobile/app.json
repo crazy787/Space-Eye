@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Space Companion",
+    "slug": "space-companion",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0D17"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.spacecompanion.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to predict ISS visibility passes over your area."
+      },
+      "config": {
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0D17"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.spacecompanion.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-location"
+    ]
+  }
+}

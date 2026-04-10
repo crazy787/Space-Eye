@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+.expo/
+dist/
+
+# Environment
+backend/.env
+mobile/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+*.tgz
+build/
