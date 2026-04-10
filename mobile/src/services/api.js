@@ -73,6 +73,8 @@ export const mediaAPI = {
   search: (query, type = 'image') =>
     api.get(`/media/search?q=${query}&type=${type}`),
   getISSStream: () => api.get('/media/iss-stream'),
+  getMars: (rover = 'curiosity', sol = 1000) =>
+    api.get(`/media/mars?rover=${rover}&sol=${sol}`),
 };
 
 export const authAPI = {

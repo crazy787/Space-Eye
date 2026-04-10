@@ -4,15 +4,24 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONT_SIZES } from '../styles/theme';
 
-// Screens
+// Phase 1 Screens
 import HomeScreen from '../screens/HomeScreen';
 import ISSTrackerScreen from '../screens/ISSTrackerScreen';
 import AIAssistantScreen from '../screens/AIAssistantScreen';
 import AlertsScreen from '../screens/AlertsScreen';
 import ExploreScreen from '../screens/ExploreScreen';
+
+// Phase 2 Screens
+import SpaceViewScreen from '../screens/SpaceViewScreen';
+import ISSTourScreen from '../screens/ISSTourScreen';
+import RocketSimScreen from '../screens/RocketSimScreen';
+
+// Phase 3 Screens
+import SatelliteTrackerScreen from '../screens/SatelliteTrackerScreen';
+import TelescopeScreen from '../screens/TelescopeScreen';
+import SpaceMediaScreen from '../screens/SpaceMediaScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -49,16 +58,8 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen
-        name="Tracker"
-        component={ISSTrackerScreen}
-        options={{ title: 'ISS Track' }}
-      />
-      <Tab.Screen
-        name="AI"
-        component={AIAssistantScreen}
-        options={{ title: 'AI Chat' }}
-      />
+      <Tab.Screen name="Tracker" component={ISSTrackerScreen} options={{ title: 'ISS Track' }} />
+      <Tab.Screen name="AI" component={AIAssistantScreen} options={{ title: 'AI Chat' }} />
       <Tab.Screen name="Alerts" component={AlertsScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />
     </Tab.Navigator>
@@ -81,7 +82,18 @@ export default function AppNavigator() {
       }}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {/* Main App */}
         <Stack.Screen name="MainTabs" component={MainTabs} />
+
+        {/* Phase 2 */}
+        <Stack.Screen name="SpaceView" component={SpaceViewScreen} options={{ animation: 'fade' }} />
+        <Stack.Screen name="ISSTour" component={ISSTourScreen} options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="RocketSim" component={RocketSimScreen} options={{ animation: 'slide_from_bottom' }} />
+
+        {/* Phase 3 */}
+        <Stack.Screen name="SatelliteTracker" component={SatelliteTrackerScreen} options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="Telescope" component={TelescopeScreen} options={{ animation: 'fade' }} />
+        <Stack.Screen name="SpaceMedia" component={SpaceMediaScreen} options={{ animation: 'slide_from_right' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

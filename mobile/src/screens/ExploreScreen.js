@@ -54,7 +54,66 @@ const SPACE_FACTS = [
   { title: 'Footprints on Moon', fact: "Footprints on the Moon will last for 100 million years because there's no wind.", icon: '👣' },
 ];
 
-export default function ExploreScreen() {
+const IMMERSIVE_FEATURES = [
+  // Phase 2
+  {
+    id: 'SpaceView',
+    title: '4D Space View',
+    desc: 'Watch Earth, ISS & Moon orbit in real-time 3D',
+    icon: 'planet',
+    colors: ['#001a33', '#003366'],
+    accentColor: '#00e5ff',
+    badge: 'INTERACTIVE',
+  },
+  {
+    id: 'ISSTour',
+    title: 'ISS 360° Tour',
+    desc: 'Explore inside the space station',
+    icon: 'home',
+    colors: ['#1a0033', '#330066'],
+    accentColor: '#ce93d8',
+    badge: 'PANORAMIC',
+  },
+  {
+    id: 'RocketSim',
+    title: 'Rocket Simulator',
+    desc: 'Launch Falcon 9, Soyuz & Crew Dragon',
+    icon: 'rocket',
+    colors: ['#1a0a00', '#331500'],
+    accentColor: '#ff9800',
+    badge: 'ANIMATED',
+  },
+  // Phase 3
+  {
+    id: 'SatelliteTracker',
+    title: 'Multi-Satellite',
+    desc: 'Track Hubble, Tiangong, Starlink & more',
+    icon: 'radio',
+    colors: ['#001a1a', '#003333'],
+    accentColor: '#26c6da',
+    badge: 'REAL-TIME',
+  },
+  {
+    id: 'Telescope',
+    title: 'Telescope',
+    desc: 'Star map, constellations & planet guide',
+    icon: 'star',
+    colors: ['#1a1a00', '#333300'],
+    accentColor: '#ffd54f',
+    badge: 'STAR MAP',
+  },
+  {
+    id: 'SpaceMedia',
+    title: 'Space Media',
+    desc: 'NASA TV, APOD, Mars Rover & live feeds',
+    icon: 'tv',
+    colors: ['#0a001a', '#1a0033'],
+    accentColor: '#ef5350',
+    badge: 'LIVE',
+  },
+];
+
+export default function ExploreScreen({ navigation }) {
   const [apod, setApod] = useState(null);
   const [streams, setStreams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,6 +172,27 @@ export default function ExploreScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
         }
       >
+        {/* Phase 2 Feature Hub */}
+        <Text style={styles.phase2Label}>✨ IMMERSIVE EXPERIENCES</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.phase2Scroll} contentContainerStyle={styles.phase2Content}>
+          {IMMERSIVE_FEATURES.map((feat) => (
+            <TouchableOpacity key={feat.id} onPress={() => navigation.navigate(feat.id)} activeOpacity={0.85}>
+              <LinearGradient colors={feat.colors} style={[styles.phase2Card, { borderColor: feat.accentColor + '40' }]}>
+                <View style={[styles.phase2IconBox, { backgroundColor: feat.accentColor + '20' }]}>
+                  <Ionicons name={feat.icon} size={26} color={feat.accentColor} />
+                </View>
+                <View style={[styles.phase2Badge, { backgroundColor: feat.accentColor + '30', borderColor: feat.accentColor + '60' }]}>
+                  <Text style={[styles.phase2BadgeText, { color: feat.accentColor }]}>{feat.badge}</Text>
+                </View>
+                <Text style={styles.phase2Title}>{feat.title}</Text>
+                <Text style={styles.phase2Desc}>{feat.desc}</Text>
+                <View style={styles.phase2Arrow}>
+                  <Text style={[styles.phase2ArrowText, { color: feat.accentColor }]}>Open  →</Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
         {/* Section Tabs */}
         <ScrollView
           horizontal
@@ -381,4 +461,38 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 22,
   },
+
+  // Phase 2 Hub
+  phase2Label: {
+    color: COLORS.textMuted,
+    fontSize: FONT_SIZES.xs || 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    marginBottom: SPACING.sm,
+  },
+  phase2Scroll: { marginHorizontal: -SPACING.md, marginBottom: SPACING.lg },
+  phase2Content: { paddingHorizontal: SPACING.md, gap: SPACING.sm },
+  phase2Card: {
+    width: 170,
+    borderRadius: 20,
+    padding: SPACING.md,
+    borderWidth: 1,
+    gap: 8,
+  },
+  phase2IconBox: {
+    width: 48, height: 48, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 4,
+  },
+  phase2Badge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8, paddingVertical: 2,
+    borderRadius: 8, borderWidth: 1,
+  },
+  phase2BadgeText: { fontSize: 9, fontWeight: '800', letterSpacing: 1.2 },
+  phase2Title: { color: COLORS.textPrimary, fontSize: FONT_SIZES.md || 15, fontWeight: '700' },
+  phase2Desc: { color: COLORS.textSecondary, fontSize: FONT_SIZES.xs || 11, lineHeight: 16 },
+  phase2Arrow: { marginTop: 4 },
+  phase2ArrowText: { fontSize: FONT_SIZES.sm || 13, fontWeight: '700' },
 });
+
